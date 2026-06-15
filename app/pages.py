@@ -152,6 +152,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#DC8C28}
         ae("شغّل التشخيص بالذكاء الاصطناعي") + '</a><div id="diagnosis-result" style="display:none;margin-top:16px"></div>' +
         '<a href="/cases" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none">' +
         ae("عرض كل الحالات") + '</a></div></div></div><script>var API="https://companies-hospital-production.up.railway.app";' +
+        'var p=new URLSearchParams(window.location.search);var tu=p.get("token");if(tu){localStorage.setItem("token",tu);window.history.replaceState({},document.title,"/triage")}' +
         'var currentCaseId=null;function showError(m){var e=document.getElementById("error");e.textContent=m;e.classList.add("show");setTimeout(function(){e.classList.remove("show")},6000)}' +
         'async function submitCase(e){e.preventDefault();var t=localStorage.getItem("token");if(!t){window.location.href="/login";return}' +
         'var b=document.getElementById("submit-btn");b.disabled=true;document.getElementById("loading").classList.add("show");' +
