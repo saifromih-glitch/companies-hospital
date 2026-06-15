@@ -17,6 +17,18 @@ from app.db.session import get_db
 from app.models.models import User
 from app.auth.dependencies import get_current_user
 
+# Fix Arabic encoding in JSON responses
+import json as _json
+from fastapi.responses import Response as _Response
+
+def _arabic_json(data, status_code=200):
+    """Return JSON with proper UTF-8 encoding for Arabic."""
+    return _Response(
+        content=_json.dumps(data, ensure_ascii=False),
+        media_type="application/json; charset=utf-8",
+        status_code=status_code,
+    )
+
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 settings = get_settings()
 
@@ -151,7 +163,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     # Create JWT
     token = create_jwt(str(user.id), user.email, user.name_ar)
 
-    return JSONResponse({
+    return _arabic_json({
         "access_token": token,
         "token_type": "bearer",
         "user": {
