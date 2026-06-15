@@ -1,9 +1,7 @@
 """مستشفى الشركات — FastAPI Application"""
 import logging
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 
 from app.config import get_settings
 
@@ -40,39 +38,13 @@ async def health():
     }
 
 
-# ═══ Static pages ═══
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend", "public")
-
-@app.get("/login")
-async def login_page():
-    path = os.path.join(FRONTEND_DIR, "login.html")
-    if os.path.isfile(path):
-        return FileResponse(path, media_type="text/html; charset=utf-8")
-    return {"status": "login page not found"}
-
-
-@app.get("/register")
-async def register_company_page():
-    path = os.path.join(FRONTEND_DIR, "register-company.html")
-    if os.path.isfile(path):
-        return FileResponse(path, media_type="text/html; charset=utf-8")
-    return {"status": "registration page not found"}
-
-
-@app.get("/triage")
-async def triage_page():
-    path = os.path.join(FRONTEND_DIR, "triage.html")
-    if os.path.isfile(path):
-        return FileResponse(path, media_type="text/html; charset=utf-8")
-    return {"status": "triage page not found"}
-
-
-@app.get("/cases")
-async def cases_page():
-    path = os.path.join(FRONTEND_DIR, "cases.html")
-    if os.path.isfile(path):
-        return FileResponse(path, media_type="text/html; charset=utf-8")
-    return {"status": "cases page not found"}
+# ═══ Static pages (embedded — no Docker encoding issues) ═══
+try:
+    from app.pages import router as pages_router
+    app.include_router(pages_router)
+    logger.info("Static pages registered")
+except Exception as e:
+    logger.warning(f"Static pages skipped: {e}")
 
 
 @app.on_event("startup")
