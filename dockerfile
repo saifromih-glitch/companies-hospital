@@ -2,10 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY backend/requirements.txt /app/
-RUN pip install --no-cache-dir -r /app/requirements.txt
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend/ /app/
+COPY app/ /app/app/
+COPY tests/ /app/tests/
 
 ENV PORT=8000
 EXPOSE 8000
