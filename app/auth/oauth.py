@@ -163,9 +163,8 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     # Create JWT
     token = create_jwt(str(user.id), user.email, user.name_ar)
 
-    # Set cookie and redirect
-    from fastapi.responses import RedirectResponse
-    resp = RedirectResponse(url="/dashboard", status_code=302)
+    # Set cookie and redirect with token in URL as fallback
+    resp = RedirectResponse(url=f"/app?token={token}", status_code=302)
     resp.set_cookie(key="ch_token", value=token, max_age=86400, httponly=False, samesite="lax")
     return resp
 
