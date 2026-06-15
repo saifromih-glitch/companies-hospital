@@ -14,17 +14,115 @@ from app.services.llm import generate as llm_generate
 router = APIRouter(prefix="/api/v1/cases", tags=["cases"])
 
 
-def _sync_llm(prompt: str) -> str:
-    """Sync wrapper for async LLM — used inside sync analyze_case."""
-    import asyncio
+async def _sync_llm(prompt: str) -> str:
+    """Call LLM (async) — bridge for sync expert engine."""
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            future = asyncio.run_coroutine_threadsafe(llm_generate(prompt), loop)
-            return future.result(timeout=60)
-        return asyncio.run(llm_generate(prompt))
+        return await llm_generate(prompt)
     except Exception as e:
         return f"[خطأ LLM: {e}]"
+
+
+async def _run_expert_analysis(case: Case, company: Company) -> dict:
+    """Run experts one-by-one (sequential) using async LLM."""
+    import time
+    from app.services.experts import get_experts_for_case, EXPERTS
+
+    experts = get_experts_for_case(case.category, case.severity)
+    analyses = []
+    total_time = 0
+
+    for expert in experts:
+        prompt = expert.prompt_template.format(
+            name=expert.name_ar,
+            emoji=expert.emoji,
+            specialty=expert.specialty,
+            title=case.title,
+            description=case.description,
+            sector=company.sector if company else "retail",
+            size=company.size if company else "small",
+        )
+
+        start = time.time()
+        try:
+            response = await llm_generate(prompt)
+        except Exception as e:
+            response = f"[خطأ: {e}]"
+        elapsed = time.time() - start
+        total_time += elapsed
+
+        analyses.append({
+            "expert_id": expert.id,
+            "expert_name": expert.name_ar,
+            "emoji": expert.emoji,
+            "analysis": response,
+            "time_ms": int(elapsed * 1000),
+        })
+
+    return {
+        "case": {"title": case.title, "category": case.category, "severity": case.severity},
+        "experts_invoked": [e.id for e in experts],
+        "total_time_ms": int(total_time * 1000),
+        "analyses": analyses,
+    }
+
+
+async def _run_synthesis(analyses: list[dict]) -> dict:
+    """Synthesize expert analyses using LLM."""
+    from app.services.synthesis import _extract_themes, _calc_consensus, _extract_recommendations
+
+    themes = _extract_themes(analyses)
+    consensus = _calc_consensus(analyses)
+    recommendations = _extract_recommendations(analyses)
+
+    # LLM synthesis
+    synthesis_text = await _llm_synthesis(analyses, themes)
+
+    return {
+        "synthesis": synthesis_text or _template_synthesis(analyses, themes),
+        "themes": themes,
+        "consensus_score": round(consensus, 2),
+        "recommendations": recommendations[:5],
+        "expert_count": len(analyses),
+    }
+
+
+async def _llm_synthesis(analyses: list[dict], themes: list[str]) -> str:
+    """Use LLM to synthesize expert analyses."""
+    from app.services.synthesis import _template_synthesis
+    
+    if not analyses:
+        return ""
+    
+    prompt = f"""أنت المنسق العام (🎼 الأوركستريتور) في مستشفى الشركات.
+
+مهمتك: دمج آراء الخبراء في تشخيص واحد متماسك.
+
+الموضوعات الرئيسية: {', '.join(themes) if themes else 'عام'}
+
+آراء الخبراء:
+"""
+    for a in analyses:
+        prompt += f"\n--- {a.get('emoji', '')} {a.get('expert_name', '')} ---\n{a.get('analysis', '')[:500]}"
+
+    prompt += """
+
+اخرج بالصيغة التالية:
+## التشخيص الموحد
+(فقرة واحدة)
+
+## التوصيات (مرتبة حسب الأولوية)
+1. ...
+2. ...
+3. ...
+
+## درجة الثقة: (عالية / متوسطة / تحتاج مراجعة)
+
+أجب بالعربية فقط."""
+    
+    try:
+        return await llm_generate(prompt, max_tokens=800)
+    except Exception:
+        return _template_synthesis(analyses, themes)
 
 
 class CaseCreate(BaseModel):
@@ -131,19 +229,11 @@ async def diagnose_case(
 
     company = db.query(Company).filter(Company.id == case.company_id).first()
 
-    # Run expert analysis with LLM
-    result = analyze_case(
-        title=case.title,
-        description=case.description,
-        category=case.category,
-        severity=case.severity,
-        sector=company.sector if company else "retail",
-        size=company.size if company else "small",
-        call_llm=_sync_llm,
-    )
+    # Run expert analysis with LLM (async)
+    result = await _run_expert_analysis(case, company)
 
     # Synthesize with LLM
-    synthesis = synthesize(result["analyses"], call_llm=_sync_llm)
+    synthesis = await _run_synthesis(result["analyses"])
 
     # Update case status
     case.status = "diagnosed"

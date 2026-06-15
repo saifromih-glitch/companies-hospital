@@ -7,8 +7,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "google/gemini-2.5-flash:free"
-FALLBACK_MODEL = "deepseek/deepseek-chat-v3-0324:free"
+DEFAULT_MODEL = "google/gemini-2.5-flash"
+FALLBACK_MODEL = "google/gemini-2.0-flash-lite-001"
 
 _api_key = os.environ.get("OPENROUTER_API_KEY", "")
 
