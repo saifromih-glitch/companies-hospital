@@ -95,6 +95,45 @@ async def cases():
     return _page(ae("الحالات — مستشفى الشركات"), _EMPTY + '<h1>' + ae("تحت الإنشاء") + '</h1></body>')
 
 
+_LANDING_CSS = """<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,sans-serif;direction:rtl}
+.hero{background:linear-gradient(135deg,#0A1E3C,#1A3A6C);color:white;padding:80px 20px;text-align:center}
+.hero h1{font-size:42px;margin-bottom:16px}
+.hero p{font-size:18px;color:#D1D5DB;max-width:600px;margin:0 auto 32px;line-height:1.7}
+.hero .btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{padding:14px 32px;border-radius:10px;font-size:16px;font-weight:700;text-decoration:none;display:inline-block}
+.btn-primary{background:#DC8C28;color:white}
+.btn-secondary{background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.3)}
+.btn-primary:hover,.btn-secondary:hover{opacity:0.9}
+.features{padding:64px 20px;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.feat{text-align:center;padding:32px 20px}
+.feat .icon{font-size:40px;margin-bottom:16px}
+.feat h3{font-size:18px;color:#0A1E3C;margin-bottom:8px}
+.feat p{font-size:14px;color:#6B7280;line-height:1.6}
+.cta{background:#F9FAFB;padding:64px 20px;text-align:center}
+.cta h2{font-size:28px;color:#0A1E3C;margin-bottom:16px}
+.cta p{font-size:16px;color:#6B7280;margin-bottom:32px}
+.footer{text-align:center;padding:24px;color:#9CA3AF;font-size:13px}
+</style>"""
+
+
+@router.get("/")
+async def landing():
+    return _page(ae("مستشفى الشركات — نظام تشغيل ذكي للشركات العربية"), _LANDING_CSS + '<body><div class="hero"><h1>&#127973; ' +
+        ae("مستشفى الشركات") + '</h1><p>' + ae("أول نظام تشغيل عربي متكامل للشركات الصغيرة والمتوسطة. تشخيص ذكي بالميتافور الطبي — استقبال، تشخيص، علاج، متابعة — عبر ٢٢ خبير ذكاء اصطناعي.") +
+        '</p><div class="btns"><a href="/login" class="btn btn-primary">' + ae("ابدأ الآن — مجاناً") +
+        '</a><a href="#features" class="btn btn-secondary">' + ae("اكتشف المميزات") + '</a></div></div>' +
+        '<div class="features" id="features">' +
+        '<div class="feat"><div class="icon">&#129504;</div><h3>' + ae("٢٢ خبير AI") + '</h3><p>' + ae("خبراء متخصصون في المالية والتسويق والعمليات والموارد البشرية والاستراتيجية والقانون والتقنية — يحللون شركتك من كل الزوايا") + '</p></div>' +
+        '<div class="feat"><div class="icon">#128172;</div><h3>' + ae("تحليل بالعربية") + '</h3><p>' + ae("كل التقارير والتحليلات والتوصيات باللغة العربية الفصحى — مفهومة ودقيقة وقابلة للتنفيذ الفوري") + '</p></div>' +
+        '<div class="feat"><div class="icon">#9201;</div><h3>' + ae("نتائج فورية") + '</h3><p>' + ae("أدخل مشكلة شركتك واحصل على تشخيص كامل من فريق الخبراء في أقل من ٣٠ ثانية") + '</p></div>' +
+        '<div class="feat"><div class="icon">#128274;</div><h3>' + ae("خصوصية وأمان") + '</h3><p>' + ae("بيانات شركتك مشفرة ولا تشارك مع أي طرف. دخول آمن عبر حساب Google") + '</p></div>' +
+        '<div class="feat"><div class="icon">#128200;</div><h3>' + ae("خطة علاج") + '</h3><p>' + ae("بعد التشخيص — خطة علاج متكاملة مع خطوات تنفيذية ومؤشرات متابعة") + '</p></div>' +
+        '<div class="feat"><div class="icon">#128259;</div><h3>' + ae("١٥ قطاع") + '</h3><p>' + ae("متخصصون في قطاعات التجزئة والضيافة والحج والعمرة والنقل والإعاشة والعقارات والصحة والتعليم والتقنية والمقاولات والصناعة والمالية والزراعة والطاقة") + '</p></div>' +
+        '</div><div class="cta"><h2>' + ae("جاهز تبدأ رحلة التحسين؟") + '</h2><p>' + ae("سجل دخولك بحساب Google وابدأ أول تشخيص لشركتك الآن — مجاناً") + '</p><a href="/login" class="btn btn-primary">' + ae("ابدأ الآن") + '</a></div><div class="footer"><p>' + ae("مستشفى الشركات © ٢٠٢٦ — صنع في مكة المكرمة بكل حب 🇸🇦") + '</p></div></body>')
+
+
 _DASH_CSS = """<style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:#F3F4F6;min-height:100vh;direction:rtl}
