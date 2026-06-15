@@ -163,15 +163,9 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     # Create JWT
     token = create_jwt(str(user.id), user.email, user.name_ar)
 
-    return _arabic_json({
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": str(user.id),
-            "email": user.email,
-            "name": user.name_ar,
-        },
-    })
+    # Redirect to dashboard with token
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url=f"/dashboard?token={token}")
 
 
 # ═══ Email/Password Auth ═══
