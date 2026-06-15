@@ -325,8 +325,8 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:#F3F4F6;min-height:100v
 @router.get("/dashboard")
 async def dashboard():
     return _page(ae("لوحة التحكم — مستشفى الشركات"), _DASH_CSS + '<body><div class="header"><h1>&#127973; ' +
-        ae("مستشفى الشركات") + '</h1><nav><a href="/dashboard" class="active">' + ae("لوحة التحكم") +
-        '</a><a href="/triage">' + ae("استقبال") + '</a><a href="/cases">' + ae("الحالات") +
+        ae("مستشفى الشركات") + '</h1><nav><a href="/dashboard" class="active" id="nav-dash">' + ae("لوحة التحكم") +
+        '</a><a href="/triage" id="nav-triage">' + ae("استقبال") + '</a><a href="/cases" id="nav-cases">' + ae("الحالات") +
         '</a></nav><span class="user-info" id="user-name"></span></div><div class="main"><div class="cards">' +
         '<div class="card primary"><div class="icon">&#127973;</div><div class="value" id="stats-company">-</div><div class="label">' + ae("الشركة") + '</div></div>' +
         '<div class="card"><div class="icon">&#128203;</div><div class="value" id="stats-cases">-</div><div class="label">' + ae("الحالات") + '</div></div>' +
