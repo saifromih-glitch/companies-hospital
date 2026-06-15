@@ -93,3 +93,43 @@ async def triage():
 @router.get("/cases")
 async def cases():
     return _page(ae("الحالات — مستشفى الشركات"), _EMPTY + '<h1>' + ae("تحت الإنشاء") + '</h1></body>')
+
+
+_DASH_CSS = """<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#F3F4F6;min-height:100vh;direction:rtl}
+.header{background:white;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.header h1{font-size:20px;color:#0A1E3C}
+.header nav a{margin-right:16px;color:#6B7280;text-decoration:none;font-size:14px;font-weight:600}
+.header nav a:hover,.header nav a.active{color:#DC8C28}
+.user-info{font-size:13px;color:#6B7280}
+.main{max-width:1000px;margin:32px auto;padding:0 20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+.card{background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.card .icon{font-size:28px;margin-bottom:8px}
+.card .value{font-size:28px;font-weight:800;color:#0A1E3C}
+.card .label{font-size:13px;color:#6B7280;margin-top:4px}
+.card.primary{border-right:4px solid #DC8C28}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.action-card{background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-decoration:none;display:block;transition:transform .2s}
+.action-card:hover{transform:translateY(-2px)}
+.action-card h3{font-size:16px;color:#0A1E3C;margin-bottom:8px}
+.action-card p{font-size:13px;color:#6B7280}
+.btn{display:inline-block;padding:10px 24px;background:#DC8C28;color:white;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;margin-top:12px}
+</style>"""
+
+
+@router.get("/dashboard")
+async def dashboard():
+    return _page(ae("لوحة التحكم — مستشفى الشركات"), _DASH_CSS + '<body><div class="header"><h1>&#127973; ' +
+        ae("مستشفى الشركات") + '</h1><nav><a href="/dashboard" class="active">' + ae("لوحة التحكم") +
+        '</a><a href="/triage">' + ae("استقبال") + '</a><a href="/cases">' + ae("الحالات") +
+        '</a></nav><span class="user-info" id="user-name"></span></div><div class="main"><div class="cards">' +
+        '<div class="card primary"><div class="icon">&#127973;</div><div class="value" id="stats-company">-</div><div class="label">' + ae("الشركة") + '</div></div>' +
+        '<div class="card"><div class="icon">&#128203;</div><div class="value" id="stats-cases">-</div><div class="label">' + ae("الحالات") + '</div></div>' +
+        '<div class="card"><div class="icon">&#129504;</div><div class="value" id="stats-experts">22</div><div class="label">' + ae("خبير AI") + '</div></div>' +
+        '<div class="card"><div class="icon">&#9889;</div><div class="value" id="stats-diagnosed">-</div><div class="label">' + ae("تم تشخيصها") + '</div></div>' +
+        '</div><div class="actions">' +
+        '<a href="/triage" class="action-card"><h3>&#129657; ' + ae("حالة جديدة") + '</h3><p>' + ae("أدخل مشكلة شركتك وسيقوم الذكاء الاصطناعي بتشخيصها") + '</p><span class="btn">' + ae("ابدأ الآن") + '</span></a>' +
+        '<a href="/cases" class="action-card"><h3>&#128203; ' + ae("الحالات السابقة") + '</h3><p>' + ae("راجع كل الحالات السابقة وتوصيات الخبراء") + '</p><span class="btn">' + ae("استعرض") + '</span></a>' +
+        '</div></div><script>var API="https://companies-hospital-production.up.railway.app";(async function(){var t=localStorage.getItem("token");if(!t){window.location.href="/login";return}try{var u=await fetch(API+"/api/v1/auth/me",{headers:{Authorization:"Bearer "+t}});var d=await u.json();document.getElementById("user-name").textContent=d.name;var cs=await fetch(API+"/api/v1/cases",{headers:{Authorization:"Bearer "+t}});var cd=await cs.json();var cases=cd.cases||[];document.getElementById("stats-cases").textContent=cd.total;var diagnosed=cases.filter(function(c){return c.status==="diagnosed"}).length;document.getElementById("stats-diagnosed").textContent=diagnosed;var co=await fetch(API+"/api/v1/companies",{headers:{Authorization:"Bearer "+t}});try{var cod=await co.json();if(cod.cases&&cod.total)document.getElementById("stats-company").textContent=cod.total}else{document.getElementById("stats-company").textContent="1"}}catch(e){console.error(e)}})();</script></body>')
