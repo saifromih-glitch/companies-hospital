@@ -1,5 +1,5 @@
 """Case endpoints — the core of Companies Hospital (Triage + Diagnosis)"""
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -9,8 +9,22 @@ from app.auth.dependencies import get_current_user
 from app.services.triage import triage_case
 from app.services.experts import analyze_case
 from app.services.synthesis import synthesize
+from app.services.llm import generate as llm_generate
 
 router = APIRouter(prefix="/api/v1/cases", tags=["cases"])
+
+
+def _sync_llm(prompt: str) -> str:
+    """Sync wrapper for async LLM — used inside sync analyze_case."""
+    import asyncio
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(llm_generate(prompt), loop)
+            return future.result(timeout=60)
+        return asyncio.run(llm_generate(prompt))
+    except Exception as e:
+        return f"[خطأ LLM: {e}]"
 
 
 class CaseCreate(BaseModel):
@@ -117,7 +131,7 @@ async def diagnose_case(
 
     company = db.query(Company).filter(Company.id == case.company_id).first()
 
-    # Run expert analysis
+    # Run expert analysis with LLM
     result = analyze_case(
         title=case.title,
         description=case.description,
@@ -125,11 +139,11 @@ async def diagnose_case(
         severity=case.severity,
         sector=company.sector if company else "retail",
         size=company.size if company else "small",
-        call_llm=None,  # LLM integration point
+        call_llm=_sync_llm,
     )
 
-    # Synthesize
-    synthesis = synthesize(result["analyses"])
+    # Synthesize with LLM
+    synthesis = synthesize(result["analyses"], call_llm=_sync_llm)
 
     # Update case status
     case.status = "diagnosed"
