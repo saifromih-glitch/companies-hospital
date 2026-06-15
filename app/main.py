@@ -59,6 +59,22 @@ async def register_company_page():
     return {"status": "registration page not found"}
 
 
+@app.get("/triage")
+async def triage_page():
+    path = os.path.join(FRONTEND_DIR, "triage.html")
+    if os.path.isfile(path):
+        return FileResponse(path, media_type="text/html; charset=utf-8")
+    return {"status": "triage page not found"}
+
+
+@app.get("/cases")
+async def cases_page():
+    path = os.path.join(FRONTEND_DIR, "cases.html")
+    if os.path.isfile(path):
+        return FileResponse(path, media_type="text/html; charset=utf-8")
+    return {"status": "cases page not found"}
+
+
 @app.on_event("startup")
 async def startup():
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")

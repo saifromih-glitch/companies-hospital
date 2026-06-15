@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الحالات — مستشفى الشركات</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #0A1E3C, #1A3A6C);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 20px; color: #0A1E3C; }
+        .header nav a { margin-right: 16px; color: #6B7280; text-decoration: none; font-size: 14px; font-weight: 600; }
+        .header nav a:hover, .header nav a.active { color: #DC8C28; }
+        .main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .card h2 { font-size: 22px; color: #0A1E3C; margin-bottom: 4px; }
+        .card .subtitle { color: #6B7280; font-size: 14px; margin-bottom: 24px; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-bar select, .filter-bar input {
+            padding: 8px 14px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: right;
+        }
+        .filter-bar select:focus { outline: none; border-color: #DC8C28; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: right; padding: 12px 16px; background: #F9FAFB; color: #374151; font-size: 13px; font-weight: 700; border-bottom: 2px solid #E5E7EB; }
+        td { padding: 14px 16px; border-bottom: 1px solid #F3F4F6; font-size: 13px; color: #4B5563; }
+        tr:hover { background: #F9FAFB; }
+        .severity {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-left: 6px;
+        }
+        .severity.critical { background: #DC2626; }
+        .severity.high { background: #D97706; }
+        .severity.medium { background: #2563EB; }
+        .severity.low { background: #6B7280; }
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.triage_complete { background: #FEF3C7; color: #92400E; }
+        .status.diagnosed { background: #DBEAFE; color: #1E40AF; }
+        .status.treatment { background: #D1FAE5; color: #065F46; }
+        .action-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #0A1E3C;
+            color: white;
+        }
+        .action-btn:hover { opacity: 0.9; }
+        .empty {
+            text-align: center;
+            padding: 48px 20px;
+            color: #9CA3AF;
+        }
+        .empty .icon { font-size: 48px; margin-bottom: 16px; }
+        .empty p { font-size: 14px; margin-bottom: 16px; }
+        .empty .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #0A1E3C;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .loading { text-align: center; padding: 40px; color: #6B7280; }
+        .btn-new {
+            display: inline-block;
+            padding: 10px 24px;
+            background: #DC8C28;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+        .btn-new:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>🏥 مستشفى الشركات</h1>
+    <nav>
+        <a href="/dashboard">لوحة التحكم</a>
+        <a href="/triage">استقبال</a>
+        <a href="/cases" class="active">الحالات</a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <h2>📋 الحالات</h2>
+                <p class="subtitle">جميع الحالات المسجلة لشركتك</p>
+            </div>
+            <a href="/triage" class="btn-new">+ حالة جديدة</a>
+        </div>
+
+        <div class="filter-bar">
+            <select id="filter-severity" onchange="renderTable()">
+                <option value="">كل مستويات الخطورة</option>
+                <option value="critical">🚨 حرجة</option>
+                <option value="high">🔴 عالية</option>
+                <option value="medium">🟡 متوسطة</option>
+                <option value="low">🟢 منخفضة</option>
+            </select>
+            <select id="filter-status" onchange="renderTable()">
+                <option value="">كل الحالات</option>
+                <option value="triage_complete">تم الفرز</option>
+                <option value="diagnosed">تم التشخيص</option>
+                <option value="treatment">تحت العلاج</option>
+            </select>
+            <select id="filter-category" onchange="renderTable()">
+                <option value="">كل المجالات</option>
+                <option value="finance">💰 مالية</option>
+                <option value="marketing">📈 تسويق</option>
+                <option value="operations">⚙️ عمليات</option>
+                <option value="hr">👥 موارد بشرية</option>
+                <option value="strategy">🧭 استراتيجية</option>
+                <option value="legal">⚖️ قانوني</option>
+                <option value="technical">💻 تقني</option>
+            </select>
+        </div>
+
+        <div id="loading" class="loading">جاري تحميل الحالات...</div>
+        <div id="empty" class="empty" style="display:none;">
+            <div class="icon">📭</div>
+            <p>لا توجد حالات بعد</p>
+            <a href="/triage" class="btn">سجل أول حالة</a>
+        </div>
+        <table id="table" style="display:none;">
+            <thead>
+                <tr>
+                    <th>الحالة</th>
+                    <th>المجال</th>
+                    <th>الخطورة</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const API = 'https://companies-hospital-production.up.railway.app';
+let cases = [];
+
+const catLabels = {finance:'مالية', marketing:'تسويق', operations:'عمليات', hr:'موارد بشرية', strategy:'استراتيجية', legal:'قانوني', technical:'تقني'};
+const sevLabels = {critical:'🚨 حرجة', high:'🔴 عالية', medium:'🟡 متوسطة', low:'🟢 منخفضة'};
+const statusLabels = {triage:'تحت الفرز', triage_complete:'تم الفرز', diagnosed:'تم التشخيص', treatment:'تحت العلاج'};
+
+async function loadCases() {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; return; }
+
+    document.getElementById('loading').style.display = 'block';
+    try {
+        const res = await fetch(`${API}/api/v1/cases`, {
+            headers: {'Authorization': `Bearer ${token}`},
+        });
+        const data = await res.json();
+        cases = data.cases || [];
+        renderTable();
+    } catch(err) {
+        console.error(err);
+        cases = [];
+        renderTable();
+    }
+}
+
+function renderTable() {
+    document.getElementById('loading').style.display = 'none';
+    const sev = document.getElementById('filter-severity').value;
+    const status = document.getElementById('filter-status').value;
+    const cat = document.getElementById('filter-category').value;
+
+    let filtered = cases;
+    if (sev) filtered = filtered.filter(c => c.severity === sev);
+    if (status) filtered = filtered.filter(c => c.status === status);
+    if (cat) filtered = filtered.filter(c => c.category === cat);
+
+    if (filtered.length === 0) {
+        document.getElementById('table').style.display = 'none';
+        document.getElementById('empty').style.display = 'block';
+        return;
+    }
+
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('table').style.display = 'table';
+
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = filtered.map(c => `
+        <tr>
+            <td style="font-weight:600;color:#111827">${esc(c.title)}</td>
+            <td>${catLabels[c.category] || c.category}</td>
+            <td><span class="severity ${c.severity}"></span> ${sevLabels[c.severity] || c.severity}</td>
+            <td><span class="status ${c.status}">${statusLabels[c.status] || c.status}</span></td>
+            <td>${c.created_at ? new Date(c.created_at).toLocaleDateString('ar-SA') : ''}</td>
+            <td><button class="action-btn" onclick="viewCase('${c.id}')">عرض</button></td>
+        </tr>
+    `).join('');
+}
+
+function viewCase(id) {
+    window.location.href = `/cases/${id}`;
+}
+
+function esc(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+}
+
+loadCases();
+</script>
+</body>
+</html>

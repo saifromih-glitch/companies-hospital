@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استقبال — مستشفى الشركات</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #0A1E3C, #1A3A6C);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 20px; color: #0A1E3C; }
+        .header nav a { margin-right: 16px; color: #6B7280; text-decoration: none; font-size: 14px; font-weight: 600; }
+        .header nav a:hover, .header nav a.active { color: #DC8C28; }
+        .main { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            margin-bottom: 24px;
+        }
+        .card h2 { font-size: 22px; color: #0A1E3C; margin-bottom: 8px; }
+        .card p { color: #6B7280; font-size: 14px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: right;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            transition: border-color 0.2s;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #DC8C28; }
+        .btn {
+            padding: 14px 32px;
+            background: #0A1E3C;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .result { margin-top: 24px; display: none; }
+        .result.show { display: block; }
+        .severity {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+        .severity.critical { background: #FEE2E2; color: #DC2626; }
+        .severity.high { background: #FEF3C7; color: #D97706; }
+        .severity.medium { background: #DBEAFE; color: #2563EB; }
+        .severity.low { background: #F3F4F6; color: #6B7280; }
+        .triage-box {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        .triage-box h3 { font-size: 16px; color: #374151; margin-bottom: 12px; }
+        .tag {
+            display: inline-block;
+            background: #E5E7EB;
+            color: #374151;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 2px;
+        }
+        .expert-tag {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #92400E;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 2px;
+        }
+        .error { background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; font-size: 13px; margin-top: 12px; display: none; }
+        .error.show { display: block; }
+        .loading { text-align: center; padding: 20px; display: none; }
+        .loading.show { display: block; }
+        .spinner { border: 3px solid #E5E7EB; border-top: 3px solid #DC8C28; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>🏥 مستشفى الشركات</h1>
+    <nav>
+        <a href="/dashboard">لوحة التحكم</a>
+        <a href="/triage" class="active">استقبال</a>
+        <a href="/cases">الحالات</a>
+    </nav>
+</div>
+
+<div class="main">
+    <div class="card">
+        <h2>🩺 استقبال حالة جديدة</h2>
+        <p>صف مشكلة شركتك وسيقوم النظام بفرزها وتوجيهها للتخصص المناسب</p>
+
+        <div class="error" id="error"></div>
+
+        <form id="case-form" onsubmit="submitCase(event)">
+            <div class="form-group">
+                <label>عنوان المشكلة</label>
+                <input type="text" id="title" required placeholder="مثال: انخفاض المبيعات في الربع الأخير" minlength="5" maxlength="300">
+            </div>
+            <div class="form-group">
+                <label>وصف تفصيلي</label>
+                <textarea id="description" required placeholder="اشرح المشكلة بالتفصيل... ما الذي يحدث؟ منذ متى؟ ما تأثيره على الشركة؟" minlength="20"></textarea>
+            </div>
+            <div class="form-group">
+                <label>المجال</label>
+                <select id="category" required>
+                    <option value="">اختر المجال</option>
+                    <option value="finance">💰 مالية</option>
+                    <option value="marketing">📈 تسويق ومبيعات</option>
+                    <option value="operations">⚙️ عمليات</option>
+                    <option value="hr">👥 موارد بشرية</option>
+                    <option value="strategy">🧭 استراتيجية</option>
+                    <option value="legal">⚖️ قانوني</option>
+                    <option value="technical">💻 تقني</option>
+                </select>
+            </div>
+            <button type="submit" class="btn" id="submit-btn">ابدأ التشخيص</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color:#6B7280;font-size:14px;">جاري فحص الحالة...</p>
+        </div>
+
+        <div class="result" id="result">
+            <div class="triage-box">
+                <h3>نتيجة الفرز</h3>
+                <p style="margin-bottom:8px">
+                    <strong>الخطورة:</strong>
+                    <span id="severity-badge"></span>
+                </p>
+                <p style="margin-bottom:8px"><strong>الكلمات المفتاحية:</strong> <span id="keywords"></span></p>
+                <p><strong>الخبراء المقترحون:</strong> <span id="experts"></span></p>
+            </div>
+            <a href="/cases" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none;">عرض كل الحالات</a>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'https://companies-hospital-production.up.railway.app';
+
+function showError(msg) {
+    const e = document.getElementById('error');
+    e.textContent = msg;
+    e.classList.add('show');
+    setTimeout(() => e.classList.remove('show'), 6000);
+}
+
+async function submitCase(e) {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('error').classList.remove('show');
+
+    const body = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        category: document.getElementById('category').value,
+    };
+
+    try {
+        const res = await fetch(`${API}/api/v1/cases`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'فشل إنشاء الحالة');
+
+        // Show triage result
+        document.getElementById('severity-badge').innerHTML = 
+            `<span class="severity ${data.severity}">${severityLabel(data.severity)}</span>`;
+        document.getElementById('keywords').innerHTML = 
+            (data.triage_result.keywords || []).map(k => `<span class="tag">${k}</span>`).join(' ');
+        document.getElementById('experts').innerHTML = 
+            (data.triage_result.suggested_experts || []).map(e => `<span class="expert-tag">${e}</span>`).join(' ');
+
+        document.getElementById('result').classList.add('show');
+        document.getElementById('case-form').reset();
+    } catch(err) {
+        showError(err.message);
+    } finally {
+        btn.disabled = false;
+        document.getElementById('loading').classList.remove('show');
+    }
+}
+
+function severityLabel(s) {
+    const map = {critical:'🚨 حرجة', high:'🔴 عالية', medium:'🟡 متوسطة', low:'🟢 منخفضة'};
+    return map[s] || s;
+}
+</script>
+</body>
+</html>
