@@ -45,12 +45,30 @@ async def triage():
 
 @router.get("/test-arabic", response_class=HTMLResponse)
 async def test_arabic():
-    return HTMLResponse("""<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>&#1578;&#1580;&#1585;&#1576;&#1577;</title></head>
+    from fastapi.responses import Response
+    html = """<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>&#1578;&#1580;&#1585;&#1576;&#1577;</title></head>
 <body style="font-family:sans-serif;padding:40px;text-align:center">
 <h1>&#1575;&#1604;&#1593;&#1585;&#1576;&#1610; &#1588;&#1594;&#1575;&#1604;!</h1>
 <p>&#1573;&#1584;&#1575; &#1603;&#1606;&#1578; &#1578;&#1602;&#1585;&#1571; &#1607;&#1584;&#1575; &#1601;&#1575;&#1604;&#1578;&#1585;&#1605;&#1610;&#1586; &#1587;&#1604;&#1610;&#1605;</p>
 <p style="color:green;font-size:24px">&#10004; Test passed</p>
-</body></html>""")
+</body></html>"""
+    return Response(content=html.encode('ascii'), media_type="text/html; charset=utf-8",
+                    headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
+
+
+@router.get("/raw-arabic", response_class=HTMLResponse)
+async def raw_arabic():
+    """Minimal test — Arabic via HTML entities in plain text."""
+    from fastapi.responses import Response
+    body = """<pre>
+&#1575;&#1604;&#1593;&#1585;&#1576;&#1610; &#1588;&#1594;&#1575;&#1604;!
+&#1575;&#1604;&#1581;&#1585;&#1608;&#1601; = Arabic letters
+&#1578;&#1587;&#1580;&#1610;&#1604; &#1575;&#1604;&#1583;&#1582;&#1608;&#1604; = Login
+&#1605;&#1587;&#1578;&#1588;&#1601;&#1609; &#1575;&#1604;&#1588;&#1585;&#1603;&#1575;&#1578; = Companies Hospital
+&#10004; This is pure ASCII
+</pre>"""
+    return Response(content=body.encode('ascii'), media_type="text/html; charset=utf-8",
+                    headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 
 @router.get("/cases", response_class=HTMLResponse)
