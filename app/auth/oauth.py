@@ -89,7 +89,7 @@ async def google_login():
     state = secrets.token_hex(16)
     params = {
         "client_id": settings.google_client_id,
-        "redirect_uri": f"{os.environ.get('APP_URL', 'http://localhost:8000')}/api/v1/auth/google/callback",
+        "redirect_uri": f"{os.environ.get('APP_URL', 'https://companies-hospital-production.up.railway.app')}/api/v1/auth/google/callback",
         "response_type": "code",
         "scope": SCOPE,
         "state": state,
@@ -114,7 +114,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             "client_secret": settings.google_client_secret,
             "code": code,
             "grant_type": "authorization_code",
-            "redirect_uri": f"{os.environ.get('APP_URL', 'http://localhost:8000')}/api/v1/auth/google/callback",
+            "redirect_uri": f"{os.environ.get('APP_URL', 'https://companies-hospital-production.up.railway.app')}/api/v1/auth/google/callback",
         })
         tokens = token_resp.json()
         access_token = tokens.get("access_token")
