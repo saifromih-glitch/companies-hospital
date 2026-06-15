@@ -142,3 +142,13 @@ async def login():
 @router.get("/register", response_class=HTMLResponse)
 async def register_company():
     return HTMLResponse(content=REGISTER_PAGE)
+
+
+@router.get("/triage", response_class=HTMLResponse)
+async def triage():
+    return HTMLResponse(content=LOGIN_PAGE)  # fallback — will redirect JS
+
+
+@router.get("/cases", response_class=HTMLResponse)
+async def cases():
+    return HTMLResponse(content=LOGIN_PAGE)  # fallback — will redirect JS
