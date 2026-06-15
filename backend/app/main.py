@@ -1,8 +1,12 @@
 """مستشفى الشركات — FastAPI Application"""
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -30,4 +34,12 @@ async def health():
         "platform": settings.app_name,
         "version": settings.app_version,
         "environment": settings.environment,
+        "database_configured": bool(settings.database_url),
     }
+
+
+@app.on_event("startup")
+async def startup():
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Environment: {settings.environment}")
+    logger.info(f"Database configured: {bool(settings.database_url)}")
