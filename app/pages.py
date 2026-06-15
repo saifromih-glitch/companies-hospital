@@ -43,6 +43,16 @@ async def triage():
     return HTMLResponse(content=_TRIAGE)
 
 
+@router.get("/test-arabic", response_class=HTMLResponse)
+async def test_arabic():
+    return HTMLResponse("""<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>&#1578;&#1580;&#1585;&#1576;&#1577;</title></head>
+<body style="font-family:sans-serif;padding:40px;text-align:center">
+<h1>&#1575;&#1604;&#1593;&#1585;&#1576;&#1610; &#1588;&#1594;&#1575;&#1604;!</h1>
+<p>&#1573;&#1584;&#1575; &#1603;&#1606;&#1578; &#1578;&#1602;&#1585;&#1571; &#1607;&#1584;&#1575; &#1601;&#1575;&#1604;&#1578;&#1585;&#1605;&#1610;&#1586; &#1587;&#1604;&#1610;&#1605;</p>
+<p style="color:green;font-size:24px">&#10004; Test passed</p>
+</body></html>""")
+
+
 @router.get("/cases", response_class=HTMLResponse)
 async def cases():
     return HTMLResponse(content=_CASES)
