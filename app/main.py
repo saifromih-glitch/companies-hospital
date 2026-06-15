@@ -48,7 +48,15 @@ async def login_page():
     path = os.path.join(FRONTEND_DIR, "login.html")
     if os.path.isfile(path):
         return FileResponse(path, media_type="text/html; charset=utf-8")
-    return FileResponse(os.path.join(FRONTEND_DIR, "index.html") if os.path.exists(os.path.join(FRONTEND_DIR, "index.html")) else "")
+    return {"status": "login page not found"}
+
+
+@app.get("/register")
+async def register_company_page():
+    path = os.path.join(FRONTEND_DIR, "register-company.html")
+    if os.path.isfile(path):
+        return FileResponse(path, media_type="text/html; charset=utf-8")
+    return {"status": "registration page not found"}
 
 
 @app.on_event("startup")
@@ -74,3 +82,10 @@ try:
     logger.info("Auth routes registered")
 except Exception as e:
     logger.warning(f"Auth routes skipped: {e}")
+
+try:
+    from app.api.v1.endpoints.companies import router as company_router
+    app.include_router(company_router)
+    logger.info("Company routes registered")
+except Exception as e:
+    logger.warning(f"Company routes skipped: {e}")
