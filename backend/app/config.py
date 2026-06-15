@@ -16,10 +16,10 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # Database
-    database_url: str = "postgresql://hospital:hospital_dev@localhost:5432/companies_hospital"
+    database_url: str = ""
     
     # Redis
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = ""
     
     # Auth
     jwt_secret: str = "dev-secret-change-in-production"
