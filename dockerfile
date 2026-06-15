@@ -6,6 +6,7 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ /app/app/
+COPY frontend/ /app/frontend/
 COPY tests/ /app/tests/
 
 ENV PORT=8000

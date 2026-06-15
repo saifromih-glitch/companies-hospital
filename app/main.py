@@ -1,7 +1,9 @@
 """مستشفى الشركات — FastAPI Application"""
 import logging
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.config import get_settings
 
@@ -36,6 +38,17 @@ async def health():
         "environment": settings.environment,
         "database_configured": bool(settings.database_url),
     }
+
+
+# ═══ Static pages ═══
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend", "public")
+
+@app.get("/login")
+async def login_page():
+    path = os.path.join(FRONTEND_DIR, "login.html")
+    if os.path.isfile(path):
+        return FileResponse(path, media_type="text/html; charset=utf-8")
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html") if os.path.exists(os.path.join(FRONTEND_DIR, "index.html")) else "")
 
 
 @app.on_event("startup")
