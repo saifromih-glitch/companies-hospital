@@ -1,12 +1,15 @@
-"""Google OAuth + JWT Authentication"""
+"""Google OAuth + Email/Password + JWT Authentication"""
 import os
 import secrets
+import re
 from datetime import datetime, timedelta, timezone
 
 import httpx
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from jose import jwt, JWTError
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -156,6 +159,89 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             "name": user.name_ar,
         },
     })
+
+
+# ═══ Email/Password Auth ═══
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+
+@router.post("/register")
+async def register(body: RegisterRequest, db: Session = Depends(get_db)):
+    """Register a new user with email and password."""
+    if not EMAIL_REGEX.match(body.email):
+        raise HTTPException(status_code=400, detail="صيغة البريد الإلكتروني غير صحيحة")
+    if len(body.password) < 8:
+        raise HTTPException(status_code=400, detail="كلمة المرور يجب أن تكون ٨ أحرف على الأقل")
+    if len(body.name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="الاسم قصير جداً")
+
+    existing = db.query(User).filter(User.email == body.email).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="البريد الإلكتروني مسجل مسبقاً")
+
+    hashed = bcrypt.hashpw(body.password.encode(), bcrypt.gensalt()).decode()
+    
+    user = User(
+        email=body.email,
+        name_ar=body.name,
+        oauth_provider="email",
+        oauth_id=hashed,  # store hashed password as oauth_id
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_jwt(str(user.id), user.email, user.name_ar)
+    return JSONResponse({
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "name": user.name_ar,
+        },
+    }, status_code=201)
+
+
+@router.post("/login")
+async def login(body: LoginRequest, db: Session = Depends(get_db)):
+    """Login with email and password."""
+    user = db.query(User).filter(
+        User.email == body.email,
+        User.oauth_provider == "email",
+    ).first()
+
+    if not user or not user.oauth_id:
+        raise HTTPException(status_code=401, detail="البريد الإلكتروني أو كلمة المرور غير صحيحة")
+
+    if not bcrypt.checkpw(body.password.encode(), user.oauth_id.encode()):
+        raise HTTPException(status_code=401, detail="البريد الإلكتروني أو كلمة المرور غير صحيحة")
+
+    user.last_login = datetime.now(timezone.utc)
+    db.commit()
+
+    token = create_jwt(str(user.id), user.email, user.name_ar)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "name": user.name_ar,
+        },
+    }
 
 
 @router.get("/me")
