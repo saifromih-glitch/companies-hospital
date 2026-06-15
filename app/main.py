@@ -89,3 +89,10 @@ try:
     logger.info("Company routes registered")
 except Exception as e:
     logger.warning(f"Company routes skipped: {e}")
+
+try:
+    from app.api.v1.endpoints.cases import router as case_router
+    app.include_router(case_router)
+    logger.info("Case routes registered")
+except Exception as e:
+    logger.warning(f"Case routes skipped: {e}")
