@@ -43,3 +43,13 @@ async def startup():
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Database configured: {bool(settings.database_url)}")
+    
+    # Initialize database tables
+    if settings.database_url:
+        try:
+            from app.models import models  # noqa: F401
+            from app.db.session import init_db
+            init_db()
+            logger.info("Database tables initialized")
+        except Exception as e:
+            logger.warning(f"Database init skipped: {e}")
