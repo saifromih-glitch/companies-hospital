@@ -12,9 +12,9 @@ def ae(text):
 
 
 def _page(title, body_css_js):
-    return Response(
-        content=('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>'
-                 + title + '</title></head>' + body_css_js + '</html>').encode('ascii'),
+    # Apply ae() to the entire output to catch any missed non-ASCII
+    html = '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>' + title + '</title></head>' + body_css_js + '</html>'
+    return Response(content=ae(html).encode('ascii'),
         media_type="text/html; charset=utf-8",
         headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
@@ -126,9 +126,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#DC8C28}
 .diagnose-link{display:inline-block;margin-top:16px;padding:10px 20px;background:#DC8C28;color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px}
 </style>"""
     cats = ''.join(f'<option value="{v}">{l}</option>' for v,l in [
-        ("", "اختر المجال"),("finance","💰 مالية"),("marketing","📈 تسويق ومبيعات"),
-        ("operations","⚙️ عمليات"),("hr","👥 موارد بشرية"),("strategy","🧭 استراتيجية"),
-        ("legal","⚖️ قانوني"),("technical","💻 تقني")])
+        ("", ae("اختر المجال")),("finance",ae("💰 مالية")),("marketing",ae("📈 تسويق ومبيعات")),
+        ("operations",ae("⚙️ عمليات")),("hr",ae("👥 موارد بشرية")),("strategy",ae("🧭 استراتيجية")),
+        ("legal",ae("⚖️ قانوني")),("technical",ae("💻 تقني"))])
     
     return _page(ae("استقبال — مستشفى الشركات"), css + '<body><div class="header"><h1>&#127973; ' +
         ae("مستشفى الشركات") + '</h1><nav><a href="/dashboard">' + ae("لوحة التحكم") +
