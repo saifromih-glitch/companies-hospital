@@ -70,6 +70,14 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="يرجى تسجيل الدخول")
 
     token = auth_header.replace("Bearer ", "")
+
+    # 👇 DEMO MODE — "Bearer demo" uses first user in DB
+    if token == "demo":
+        user = db.query(User).first()
+        if user:
+            return user
+        raise HTTPException(status_code=401, detail="لا يوجد مستخدم — سجل دخول أولاً")
+
     payload = decode_jwt(token)
     user_id = payload.get("sub")
 
