@@ -53,3 +53,11 @@ async def startup():
             logger.info("Database tables initialized")
         except Exception as e:
             logger.warning(f"Database init skipped: {e}")
+
+# ═══ Routers ═══
+try:
+    from app.auth.oauth import router as auth_router
+    app.include_router(auth_router)
+    logger.info("Auth routes registered")
+except Exception as e:
+    logger.warning(f"Auth routes skipped: {e}")
