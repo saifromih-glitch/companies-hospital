@@ -9,12 +9,13 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from jose import jwt, JWTError
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db.session import get_db
 from app.models.models import User
+from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 settings = get_settings()
