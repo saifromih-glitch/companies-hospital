@@ -1,0 +1,49 @@
+## 🧰 مهارات Romih Agent (AutoClaw + OpenClaw)
+
+### 🔍 بحث ومعرفة (3):
+  • **web_search** - بحث في الويب (16 محرك) - Google, Bing, DuckDuckGo...
+  • **deep_research** - بحث أكاديمي عميق - دورتين بحث لكل موضوع مع استشهادات APA
+  • **fetch_page** - قراءة صفحة ويب واستخراج محتواها
+
+### 📄 مستندات (5):
+  • **create_pdf** - إنشاء PDF احترافي - تقارير، عقود، عروض
+  • **create_docx** - إنشاء وتحرير Word - تقارير، عقود، مراسلات
+  • **create_xlsx** - إنشاء Excel - جداول، تحليل، رسوم بيانية
+  • **create_ppt** - إنشاء عروض تقديمية PPT - شرائح احترافية
+  • **convert_to_markdown** - تحويل أي ملف (PDF, Word, Excel, HTML) إلى Markdown
+
+### 📊 تحليل وبيانات (3):
+  • **stock_analysis** - تحليل أسهم أمريكية - أساسي + فني + تقييم
+  • **market_research** - دراسة سوق - حجم، منافسين، فرص
+  • **backtest_strategy** - اختبار استراتيجيات تداول - Backtesting منهجي
+
+### 🎨 إبداع وتصميم (5):
+  • **generate_image** - توليد صور بالذكاء الاصطناعي - DALL-E, Stable Diffusion
+  • **recognize_image** - تحليل الصور - وصف، كشف كائنات، OCR
+  • **create_chart** - إنشاء رسوم بيانية احترافية - matplotlib, seaborn, ECharts
+  • **edit_video** - تحرير فيديو - قص، ضغط، تحويل، استخراج صوت
+  • **transcribe_audio** - تحويل الصوت إلى نص - Whisper، دعم العربية
+
+### 💻 تطوير وبرمجة (3):
+  • **github_ops** - إدارة GitHub - issues, PRs, actions, repos
+  • **deploy_vercel** - نشر على Vercel - مواقع، APIs، بيئة إنتاج
+  • **code_with_agent** - برمجة احترافية - TDD، Micro-diffs، CI/CD
+
+### 📧 تواصل (2):
+  • **send_email** - إرسال وإدارة البريد - Gmail, IMAP/SMTP
+  • **get_news** - أخبار AI والعالم - تجميع وتلخيص
+
+### 🧠 إنتاجية (4):
+  • **manage_notion** - إدارة Notion - صفحات، قواعد بيانات، مهام
+  • **manage_obsidian** - إدارة Obsidian - ملاحظات، روابط، رسم بياني
+  • **get_weather** - حالة الطقس - حالي + توقعات
+  • **get_secret** - إدارة كلمات المرور - 1Password CLI
+
+### 🌐 متصفح وأتمتة (2):
+  • **browse_web** - تصفح ويب آلي - فتح، تعبئة، تسجيل، شراء
+  • **download_video** - تحميل فيديو/صوت من YouTube وأي منصة - yt-dlp
+
+### 🎓 تعليم وتصميم (3):
+  • **create_slides** - عروض HTML تفاعلية - تحويل PDF/PPT لشرائح ويب
+  • **design_ui** - تصميم واجهات UI/UX احترافية مع RTL عربي
+  • **brainstorm** - عصف ذهني منظم - أفكار، متطلبات، تصميم قبل التنفيذ

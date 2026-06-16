@@ -48,6 +48,7 @@ class TelegramBot:
         """تعيين قائمة الأوامر"""
         commands = [
             {"command": "start", "description": "ابدأ المحادثة"},
+            {"command": "goal", "description": "نفذ مهمة متعددة الخطوات"},
             {"command": "ask", "description": "اسأل Romih سؤال"},
             {"command": "build", "description": "اطلب من Romih بناء شيء"},
             {"command": "expert", "description": "استشر خبيراً"},
@@ -245,6 +246,12 @@ class MessageHandler:
 
         if cmd == "/help":
             await bot.send_message(chat_id, self.HELP_MSG)
+            return True
+
+        if cmd == "/goal" and arg:
+            await bot.send_chat_action(chat_id)
+            response = await self.agent.execute_goal(arg)
+            await bot.send_message(chat_id, response)
             return True
 
         if cmd == "/status":

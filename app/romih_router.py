@@ -77,6 +77,13 @@ async def chat(req: ChatRequest):
     return {"response": response, "status": agent.get_status()}
 
 
+@router.post("/goal")
+async def execute_goal(req: ChatRequest):
+    agent, _, _ = _get_agent()
+    response = await agent.execute_goal(req.message)
+    return {"response": response, "status": agent.get_status()}
+
+
 @router.get("/debug/prompt")
 async def debug_prompt():
     agent, _, _ = _get_agent()

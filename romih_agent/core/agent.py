@@ -72,6 +72,11 @@ class RomihAgent:
             _register_web(self.tools)
         except Exception:
             pass
+        # Agent Loop (think-act-observe)
+        self.loop = None
+        if create_swarm:
+            from core.agent_loop import AgentLoop
+            self.loop = AgentLoop(self)
         self.history: list[Message] = []
         self._init_system_prompt()
 
@@ -222,6 +227,12 @@ class RomihAgent:
         # نحتفظ بآخر ٢٠ رسالة فقط
         self.history = self.history[-20:]
 
+    async def execute_goal(self, goal: str) -> str:
+        """Execute a multi-step goal using the Agent Loop (Think-Act-Observe)"""
+        if self.loop:
+            return await self.loop.execute(goal)
+        return await self.chat(goal)
+
     def clear_history(self):
         """مسح المحادثة الحالية"""
         self.history = []
@@ -238,6 +249,7 @@ class RomihAgent:
             "swarm_agents": len(self.swarm.agents) if self.swarm else 0,
             "memory_items": self.memory.long_term.get_stats()["total"] if self.memory else 0,
             "tools_count": len(self.tools.tools) if self.tools else 0,
+            "agent_loop": self.loop is not None,
         }
 
 
