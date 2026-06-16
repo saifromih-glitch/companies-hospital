@@ -226,14 +226,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ═══ STATUS ═══
 async function loadStatus() {
-  const r = await fetch('/api/status');
+  const r = await fetch('/romih/status');
   const s = await r.json();
   document.getElementById('mem-count').textContent = s.memory_items || 0;
 }
 
 // ═══ AGENTS ═══
 async function loadAgents() {
-  const r = await fetch('/api/agents');
+  const r = await fetch('/romih/agents');
   const d = await r.json();
   const list = document.getElementById('agents-list');
   list.innerHTML = (d.agents||[]).map(a => 
@@ -243,7 +243,7 @@ async function loadAgents() {
 
 // ═══ MEMORY ═══
 async function loadMemory() {
-  const r = await fetch('/api/memory');
+  const r = await fetch('/romih/memory');
   const m = await r.json();
   document.getElementById('mem-detail').textContent = 
     m.categories ? Object.entries(m.categories).map(([k,v])=>`${k}:${v}`).join(' | ') : '';
@@ -251,7 +251,7 @@ async function loadMemory() {
 
 // ═══ TOOLS ═══
 async function loadTools() {
-  const r = await fetch('/api/tools');
+  const r = await fetch('/romih/tools');
   const d = await r.json();
   const panel = document.getElementById('tools-panel');
   const icons = {
@@ -275,7 +275,7 @@ async function toggleExperts() {
     modal.style.display = 'none';
     return;
   }
-  const r = await fetch('/api/experts');
+  const r = await fetch('/romih/experts');
   const d = await r.json();
   const content = document.getElementById('expert-content');
   content.innerHTML = `
@@ -301,7 +301,7 @@ async function toggleExperts() {
 
 // ═══ ACTIVATE EXPERT ═══
 async function activateExpert(key) {
-  const r = await fetch('/api/tools/execute', {
+  const r = await fetch('/romih/tools/execute', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({tool_name:'consult_expert', params:{expert_key:key, problem:''}, auto_approve:true})
@@ -345,7 +345,7 @@ async function sendMessage() {
   sendBtn.disabled = true;
 
   try {
-    const r = await fetch('/api/chat', {
+    const r = await fetch('/romih/chat', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({message: msg, task_type: activeExpert ? 'reasoning' : 'chat'})

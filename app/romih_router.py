@@ -133,7 +133,7 @@ async def telegram_webhook(req: Request):
     _, bot, handler = _get_agent()
     try:
         update = await req.json()
-        msg = TelegramBot.parse_message(update)
+        msg = bot.parse_message(update)
         if msg and bot.token:
             await handler.handle(msg, bot)
     except Exception as e:
