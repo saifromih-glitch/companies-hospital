@@ -1,14 +1,14 @@
 """
-Romih Agent — FastAPI Router
+Romih Agent — Minimal Router
 =============================
-Mounted inside Companies Hospital backend
-Routes: /romih/* and /webhook/telegram
+Lazy imports to avoid startup failures
 """
 import sys
 import os
 import io
+import json
 
-# Path setup — romih_agent modules use relative imports
+# Path setup
 _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _BACKEND_DIR)
 sys.path.insert(0, os.path.join(_BACKEND_DIR, "romih_agent"))
@@ -17,15 +17,23 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
-from romih_agent.core.agent import RomihAgent, AgentConfig
-from romih_agent.server.telegram_bot import TelegramBot, MessageHandler
-
-# Init agent once
-agent = RomihAgent(AgentConfig(name="محمد"))
-bot = TelegramBot()
-handler = MessageHandler(agent)
-
 router = APIRouter(prefix="/romih", tags=["Romih Agent"])
+
+# Lazy-loaded agent — only initialized when first needed
+_agent = None
+_bot = None
+_handler = None
+
+
+def _get_agent():
+    global _agent, _bot, _handler
+    if _agent is None:
+        from romih_agent.core.agent import RomihAgent, AgentConfig
+        from romih_agent.server.telegram_bot import TelegramBot, MessageHandler
+        _agent = RomihAgent(AgentConfig(name="محمد"))
+        _bot = TelegramBot()
+        _handler = MessageHandler(_agent)
+    return _agent, _bot, _handler
 
 
 class ChatRequest(BaseModel):
@@ -34,47 +42,73 @@ class ChatRequest(BaseModel):
     prefer_local: bool = False
 
 
-# ═══ API Routes ═══
+# ═══ Simple test route ═══
+
+@router.get("/ping")
+async def ping():
+    return {"status": "romih", "message": "Romih Agent is alive"}
+
 
 @router.get("/health")
 async def health():
-    return {
-        "status": "ok",
-        "agent": "Romih Agent",
-        "tools": len(agent.tools.tools),
-        "telegram": "active" if bot.me else "not configured",
-    }
+    try:
+        agent, bot, _ = _get_agent()
+        return {
+            "status": "ok",
+            "agent": "Romih Agent",
+            "tools": len(agent.tools.tools),
+            "telegram": "active" if bot.me else "not configured",
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
 
 @router.get("/status")
 async def status():
+    agent, _, _ = _get_agent()
     return agent.get_status()
+
 
 @router.post("/chat")
 async def chat(req: ChatRequest):
+    agent, _, _ = _get_agent()
     agent.config.prefer_local = req.prefer_local
     response = await agent.chat(req.message, req.task_type)
     return {"response": response, "status": agent.get_status()}
 
+
 @router.get("/tools")
 async def list_tools():
+    agent, _, _ = _get_agent()
     return {"categories": agent.tools.list_by_category(), "total": len(agent.tools.tools)}
+
 
 @router.get("/experts")
 async def list_experts():
     from romih_agent.tools.rabie_brain import EXPERTS, METHODOLOGIES
     return {"experts": EXPERTS, "methodologies": METHODOLOGIES}
 
+
 @router.post("/tools/execute")
 async def execute_tool(req: dict):
-    result = agent.tools.execute(req.get("tool_name",""), req.get("params",{}), req.get("auto_approve",False))
+    agent, _, _ = _get_agent()
+    result = agent.tools.execute(
+        req.get("tool_name", ""),
+        req.get("params", {}),
+        req.get("auto_approve", False)
+    )
     return {"result": result}
+
 
 @router.get("/memory")
 async def get_memory():
+    agent, _, _ = _get_agent()
     return agent.memory.long_term.get_stats() if agent.memory else {}
+
 
 @router.get("/agents")
 async def list_agents():
+    agent, _, _ = _get_agent()
     if agent.swarm:
         return {"agents": agent.swarm.list_agents()}
     return {"agents": []}
@@ -84,7 +118,9 @@ async def list_agents():
 
 @router.get("/", response_class=HTMLResponse)
 async def serve_ui():
-    ui_path = os.path.join(os.path.dirname(__file__), "romih_agent", "server", "ui.html")
+    ui_path = os.path.join(_BACKEND_DIR, "romih_agent", "server", "ui.html")
+    if not os.path.exists(ui_path):
+        return HTMLResponse("<h1>UI not found</h1>")
     with open(ui_path, 'r', encoding='utf-8') as f:
         html = f.read()
     return HTMLResponse(content=html, media_type="text/html; charset=utf-8")
@@ -94,6 +130,7 @@ async def serve_ui():
 
 @router.post("/webhook")
 async def telegram_webhook(req: Request):
+    _, bot, handler = _get_agent()
     try:
         update = await req.json()
         msg = TelegramBot.parse_message(update)
@@ -106,6 +143,7 @@ async def telegram_webhook(req: Request):
 
 @router.get("/telegram/setup")
 async def setup_telegram(webhook_url: str = ""):
+    _, bot, _ = _get_agent()
     if not bot.token:
         return {"error": "TELEGRAM_BOT_TOKEN not set"}
     if not await bot.init():
@@ -116,17 +154,3 @@ async def setup_telegram(webhook_url: str = ""):
             await bot.set_commands()
         return {"ok": ok, "webhook_url": f"{webhook_url}/romih/webhook", "bot": bot.me}
     return {"ok": True, "bot": bot.me}
-
-
-# ═══ Startup ═══
-
-@router.on_event("startup")
-async def startup():
-    if bot.token:
-        if await bot.init():
-            print(f"🤖 Telegram Bot: @{bot.me.get('username', 'unknown')} — ready")
-            webhook_url = os.environ.get("WEBHOOK_URL", "")
-            if webhook_url:
-                await bot.set_webhook(f"{webhook_url}/romih/webhook")
-                await bot.set_commands()
-                print(f"📡 Webhook set: {webhook_url}/romih/webhook")
