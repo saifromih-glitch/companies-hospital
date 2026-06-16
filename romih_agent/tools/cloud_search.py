@@ -49,7 +49,7 @@ def recognize_image(url: str) -> str:
     """Analyze image using OpenRouter's vision model"""
     try:
         import os
-        key = os.environ.get("OPENROUTER_KEY", "")
+        key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENROUTER_KEY", "")
         if not key:
             return "Image recognition requires OpenRouter key"
         
@@ -78,7 +78,7 @@ def deep_research(query: str) -> str:
     """Deep research using OpenRouter with tool calling"""
     try:
         import os
-        key = os.environ.get("OPENROUTER_KEY", "")
+        key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENROUTER_KEY", "")
         if not key:
             return "Research requires OpenRouter key"
         

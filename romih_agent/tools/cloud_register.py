@@ -11,7 +11,7 @@ def register(tools_registry):
     
     # Check if we're on Railway (OPENROUTER_KEY exists)
     import os
-    is_cloud = bool(os.environ.get("OPENROUTER_KEY"))
+    is_cloud = bool(os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENROUTER_KEY"))
     if not is_cloud:
         print("Cloud tools: skipping (local environment)")
         return

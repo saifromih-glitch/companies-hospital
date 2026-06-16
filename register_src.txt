@@ -1,0 +1,3 @@
+    def register(self, tool: Tool):
+        """تسجيل أداة جديدة"""
+        self.tools[tool.name] = tool

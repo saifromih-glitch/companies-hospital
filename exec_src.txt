@@ -1,0 +1,43 @@
+    def execute(self, tool_name: str, params: dict,
+                auto_approve: bool = False) -> str:
+        """
+        تنفيذ أداة مع فحص الأمان.
+        
+        Args:
+            tool_name: اسم الأداة
+            params: المعاملات
+            auto_approve: تجاوز طلب الموافقة (للمستخدم المالك فقط)
+        """
+        tool = self.get(tool_name)
+        if not tool:
+            return f"❌ أداة غير معروفة: {tool_name}\nالأدوات المتاحة: {', '.join(self.tools.keys())}"
+
+        # ١. فحص المخاطر عبر Safety Shield
+        if self.shield and tool.risk in (RiskLevel.HIGH, RiskLevel.CRITICAL):
+            command_str = f"{tool_name} {json.dumps(params)}"
+            decision = self.shield.evaluate(command_str)
+            if decision.risk == "BLOCKED":
+                return f"🛡️ ممنوع: {decision.reason}"
+
+        # ٢. طلب موافقة للأدوات عالية الخطورة
+        if tool.requires_approval and not auto_approve:
+            return (f"⚠️ هذه الأداة تحتاج موافقة:\n"
+                    f"   الأداة: {tool_name}\n"
+                    f"   المعاملات: {params}\n"
+                    f"   استخدم auto_approve=True للتنفيذ")
+
+        # ٣. تحضير المعاملات
+        kwargs = {}
+        for param in tool.params:
+            value = params.get(param.name, param.default)
+            if param.required and value is None:
+                return f"❌ المعامل {param.name} مطلوب"
+            if value is not None:
+                kwargs[param.name] = value
+
+        # ٤. تنفيذ
+        try:
+            result = tool.execute(**kwargs)
+            return result
+        except Exception as e:
+            return f"❌ فشل تنفيذ {tool_name}: {e}"
