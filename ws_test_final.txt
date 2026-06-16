@@ -1,0 +1,5 @@
+=== TEST 1 ===
+{'ok': True, 'affected': 1, 'last_id': 1}
+
+=== TEST 2 ===
+{'customers': [{'id': 1, 'name': 'Mohammed', 'phone': '0501234567', 'vehicle': 'Toyota Hilux', 'notes': '', 'created_at': '2026-06-16 22:43:40'}]}

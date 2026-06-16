@@ -139,6 +139,16 @@ async def serve_ui():
     return HTMLResponse(content=html, media_type="text/html; charset=utf-8")
 
 
+@router.get("/dashboard", response_class=HTMLResponse)
+async def serve_dashboard():
+    dashboard_path = os.path.join(_BACKEND_DIR, "romih_agent", "server", "dashboard.html")
+    if not os.path.exists(dashboard_path):
+        return HTMLResponse("<h1>Dashboard not found</h1>")
+    with open(dashboard_path, 'r', encoding='utf-8') as f:
+        html = f.read()
+    return HTMLResponse(content=html, media_type="text/html; charset=utf-8")
+
+
 # ═══ Telegram Webhook ═══
 
 @router.post("/webhook")

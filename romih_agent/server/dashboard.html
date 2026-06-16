@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Romih Agent - Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font:16px system-ui;min-height:100vh}
+.header{background:#1e293b;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #334155}
+.header h1{font-size:20px;color:#38bdf8}
+.status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:6px}
+.status-text{font-size:13px;color:#94a3b8}
+.refresh{background:#38bdf8;color:#0f172a;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px}
+.refresh:hover{background:#7dd3fc}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;padding:16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
+.card-header{padding:14px 16px;background:#334155;font-weight:600;font-size:15px}
+.card-body{padding:16px;font-size:14px}
+.metric{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e293b}
+.metric:last-child{border:none}
+.val{color:#38bdf8;font-weight:600;font-family:monospace}
+.tool-tag{display:inline-block;margin:3px;padding:3px 8px;border-radius:8px;font-size:12px;background:#1e293b;color:#94a3b8}
+.tool-tag.low{border-left:3px solid #22c55e}
+.tool-tag.medium{border-left:3px solid #eab308}
+.tool-tag.high{border-left:3px solid #ef4444}
+.tool-cat{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:5px 0}
+.cat-name{font-size:11px;color:#64748b;min-width:85px;text-transform:uppercase}
+.loading{text-align:center;color:#64748b;padding:30px;font-size:14px}
+.error{color:#ef4444;padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1><span class="status-dot"></span>Romih Agent</h1>
+  <div>
+    <span class="status-text" id="clock"></span>
+    <button class="refresh" onclick="load()">Refresh</button>
+  </div>
+</div>
+<div class="grid" id="main"></div>
+<script>
+var S = ['System', 'Workshop', 'Memory', 'Tools - all categories'];
+var C = [];
+async function load(){
+  document.getElementById('main').innerHTML = '<div class="loading">Loading dashboard...</div>';
+  try{
+    // Fetch all data in parallel
+    var [sr, tr, wr, mr] = await Promise.all([
+      fetch('/romih/status').then(r=>r.json()),
+      fetch('/romih/tools').then(r=>r.json()),
+      fetch('/romih/goal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'generate workshop daily report'})}).then(r=>r.json()),
+      fetch('/romih/memory').then(r=>r.json())
+    ]);
+    render(sr, tr, wr, mr);
+  }catch(e){
+    document.getElementById('main').innerHTML = '<div class="error">Connection error: '+e.message+'</div>';
+  }
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',{hour12:false});
+}
+function render(s, t, w, m){
+  var ws = w && w.response ? w.response : {};
+  if(typeof ws === 'string'){
+    try{ ws = JSON.parse(ws.split('\n').pop() || '{}'); }catch(e){ ws = {}; }
+  }
+  // Build tool categories
+  var cats = {};
+  (t.tools || []).forEach(function(t2){
+    var c = t2.category || 'other';
+    if(!cats[c]) cats[c] = [];
+    cats[c].push(t2);
+  });
+  var catKeys = Object.keys(cats).sort();
+  
+  var h = '';
+  // Card 1: System
+  h += '<div class="card"><div class="card-header">'+S[0]+'</div><div class="card-body">';
+  h += row('Agent', s.name || 'Romih');
+  h += row('Tools', (s.tools_count || 0));
+  h += row('Sub-agents', (s.swarm_agents || 0));
+  h += row('Memory Items', (s.memory_items || 0));
+  h += row('Loop', s.agent_loop ? 'Active' : 'Off');
+  h += row('History', (s.history_length || 0) + ' msgs');
+  h += '</div></div>';
+  
+  // Card 2: Workshop
+  h += '<div class="card"><div class="card-header">'+S[1]+'</div><div class="card-body">';
+  h += row('Active Repairs', ws.active_repairs || 0);
+  h += row('Done Today', ws.completed_today || 0);
+  h += row('Revenue', (ws.revenue_today || 0) + ' SAR');
+  h += row('Paid', (ws.paid_today || 0) + ' SAR');
+  h += row('Low Stock', (ws.low_stock_items || 0));
+  h += '</div></div>';
+  
+  // Card 3: Memory
+  h += '<div class="card"><div class="card-header">'+S[2]+'</div><div class="card-body">';
+  h += row('Short-term', (m.short_term || 0) + ' msgs');
+  h += row('Session', (m.session || 0) + ' items');
+  if(m.long_term_stats){
+    h += row('Long-term', (m.long_term_stats.total || m.long_term_total || 0) + ' facts');
+  } else {
+    h += row('Long-term', (m.long_term_total || 0) + ' facts');
+  }
+  h += row('Categories', (m.categories || 0));
+  h += '</div></div>';
+  
+  // Card 4: Tools by category
+  h += '<div class="card"><div class="card-header">'+S[3]+'</div><div class="card-body">';
+  catKeys.forEach(function(cat){
+    h += '<div class="tool-cat"><span class="cat-name">'+cat+'</span>';
+    cats[cat].forEach(function(t2){
+      h += '<span class="tool-tag '+t2.risk+'">'+t2.name+'</span>';
+    });
+    h += '</div>';
+  });
+  h += '</div></div>';
+  
+  document.getElementById('main').innerHTML = h;
+}
+function row(label, value){
+  return '<div class="metric"><span>'+label+'</span><span class="val">'+value+'</span></div>';
+}
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>
