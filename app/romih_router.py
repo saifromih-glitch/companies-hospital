@@ -77,6 +77,12 @@ async def chat(req: ChatRequest):
     return {"response": response, "status": agent.get_status()}
 
 
+@router.get("/debug/prompt")
+async def debug_prompt():
+    agent, _, _ = _get_agent()
+    return {"system_prompt": agent.system_prompt[:2000]}
+
+
 @router.get("/tools")
 async def list_tools():
     agent, _, _ = _get_agent()
