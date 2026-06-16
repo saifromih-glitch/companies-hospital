@@ -1,0 +1,334 @@
+"""
+Romih Agent — Telegram Bot
+===========================
+Webhook-based Telegram integration
+"""
+import os
+import io
+import json
+import httpx
+import asyncio
+from typing import Optional
+
+TELEGRAM_API = "https://api.telegram.org"
+
+
+class TelegramBot:
+    """Romih Agent على تيليجرام"""
+
+    def __init__(self, token: str = ""):
+        self.token = token or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        self.base = f"{TELEGRAM_API}/bot{self.token}"
+        self.me = None
+
+    async def init(self):
+        """التحقق من صحة البوت"""
+        if not self.token:
+            return False
+        try:
+            async with httpx.AsyncClient(timeout=15) as c:
+                r = await c.get(f"{self.base}/getMe")
+                self.me = r.json().get("result", {})
+                return bool(self.me)
+        except Exception:
+            return False
+
+    async def set_webhook(self, url: str) -> bool:
+        """تعيين webhook"""
+        async with httpx.AsyncClient(timeout=15) as c:
+            r = await c.post(f"{self.base}/setWebhook", json={"url": url})
+            return r.json().get("ok", False)
+
+    async def delete_webhook(self) -> bool:
+        async with httpx.AsyncClient(timeout=15) as c:
+            r = await c.post(f"{self.base}/deleteWebhook")
+            return r.json().get("ok", False)
+
+    async def set_commands(self):
+        """تعيين قائمة الأوامر"""
+        commands = [
+            {"command": "start", "description": "ابدأ المحادثة"},
+            {"command": "ask", "description": "اسأل Romih سؤال"},
+            {"command": "build", "description": "اطلب من Romih بناء شيء"},
+            {"command": "expert", "description": "استشر خبيراً"},
+            {"command": "status", "description": "حالة الوكيل"},
+            {"command": "tools", "description": "الأدوات المتاحة"},
+            {"command": "agents", "description": "الوكلاء الفرعيون"},
+            {"command": "memory", "description": "الذاكرة"},
+            {"command": "help", "description": "المساعدة"},
+        ]
+        async with httpx.AsyncClient(timeout=15) as c:
+            await c.post(f"{self.base}/setMyCommands", json={"commands": commands})
+
+    async def send_message(self, chat_id: int, text: str,
+                           parse_mode: str = "Markdown",
+                           reply_to: int = None) -> dict:
+        """إرسال رسالة"""
+        if len(text) > 4000:
+            text = text[:4000] + "\n\n_(مقطوع...)_"
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": parse_mode,
+        }
+        if reply_to:
+            payload["reply_parameters"] = {"message_id": reply_to}
+        try:
+            async with httpx.AsyncClient(timeout=30) as c:
+                r = await c.post(f"{self.base}/sendMessage", json=payload)
+                return r.json()
+        except Exception as e:
+            print(f"Telegram send error: {e}")
+            return {"ok": False}
+
+    async def send_chat_action(self, chat_id: int, action: str = "typing"):
+        """إرسال 'جاري الكتابة...'"""
+        async with httpx.AsyncClient(timeout=10) as c:
+            await c.post(f"{self.base}/sendChatAction", json={
+                "chat_id": chat_id, "action": action
+            })
+
+    async def send_buttons(self, chat_id: int, text: str,
+                           buttons: list[list[tuple]]) -> dict:
+        """إرسال أزرار تفاعلية"""
+        keyboard = {
+            "inline_keyboard": [
+                [{"text": t, "callback_data": d} for t, d in row]
+                for row in buttons
+            ]
+        }
+        async with httpx.AsyncClient(timeout=30) as c:
+            r = await c.post(f"{self.base}/sendMessage", json={
+                "chat_id": chat_id,
+                "text": text,
+                "reply_markup": keyboard,
+                "parse_mode": "Markdown"
+            })
+            return r.json()
+
+    async def answer_callback(self, callback_id: str, text: str = ""):
+        """الرد على callback query"""
+        async with httpx.AsyncClient(timeout=10) as c:
+            await c.post(f"{self.base}/answerCallbackQuery", json={
+                "callback_query_id": callback_id, "text": text
+            })
+
+    @staticmethod
+    def parse_message(update: dict) -> Optional[dict]:
+        """استخراج الرسالة من update"""
+        if "message" in update:
+            msg = update["message"]
+            return {
+                "chat_id": msg["chat"]["id"],
+                "user_id": msg.get("from", {}).get("id"),
+                "username": msg.get("from", {}).get("first_name", "User"),
+                "text": msg.get("text", ""),
+                "message_id": msg.get("message_id"),
+            }
+        if "callback_query" in update:
+            cb = update["callback_query"]
+            return {
+                "chat_id": cb["message"]["chat"]["id"],
+                "user_id": cb["from"]["id"],
+                "username": cb["from"].get("first_name", "User"),
+                "text": cb.get("data", ""),
+                "message_id": cb["message"]["message_id"],
+                "callback_id": cb["id"],
+                "is_callback": True,
+            }
+        return None
+
+    @staticmethod
+    def extract_command(text: str) -> tuple[str, str]:
+        """استخراج الأمر والنص"""
+        text = text.strip()
+        if text.startswith("/"):
+            parts = text.split(" ", 1)
+            cmd = parts[0].lower().replace("@romihagent_bot", "")
+            arg = parts[1] if len(parts) > 1 else ""
+            return cmd, arg
+        return "", text
+
+
+# ═══ معالج الرسائل ═══
+
+class MessageHandler:
+    """معالج رسائل Telegram — يوجهها لـ Romih Agent"""
+
+    START_MSG = (
+        "\U0001f338 *Romih Agent* \u2014 \u0648\u0643\u064a\u0644\u0643 \u0627\u0644\u0630\u0643\u064a\n\n"
+        "\U0001f9e0 *\u0661\u0667 \u062e\u0628\u064a\u0631\u064b\u0627* \u0644\u062f\u0649 \u0623\u0645\u0631\u0643\n"
+        "\U0001f4a1 *\u0669 \u0645\u0646\u0647\u062c\u064a\u0627\u062a* \u0644\u0644\u062a\u0641\u0643\u064a\u0631\n"
+        "\U0001f4e6 *\u0665\u0662 \u0623\u062f\u0627\u0629* \u062c\u0627\u0647\u0632\u0629\n\n"
+        "*\u0627\u0644\u0623\u0648\u0627\u0645\u0631:*\n"
+        "/ask _\u0633\u0624\u0627\u0644\u0643_ \u2014 \u0627\u0633\u0623\u0644 \u0631\u0648\u0645\u064a\u062d\n"
+        "/build _\u0645\u0634\u0631\u0648\u0639\u0643_ \u2014 \u0627\u0628\u0646\u064a \u0634\u064a\u0621\n"
+        "/expert \u2014 \u0627\u0633\u062a\u0634\u0631 \u062e\u0628\u064a\u0631\u064b\u0627\n"
+        "/status \u2014 \u062d\u0627\u0644\u0629 \u0627\u0644\u0648\u0643\u064a\u0644\n"
+        "/tools \u2014 \u0627\u0644\u0623\u062f\u0648\u0627\u062a\n"
+        "/help \u2014 \u0647\u0630\u0647 \u0627\u0644\u0631\u0633\u0627\u0644\u0629"
+    )
+
+    HELP_MSG = (
+        "\U0001f4ac *\u0643\u064a\u0641 \u062a\u0633\u062a\u062e\u062f\u0645 Romih Agent:*\n\n"
+        "\u2022 \u0627\u0643\u062a\u0628 \u0633\u0624\u0627\u0644\u0643 \u0645\u0628\u0627\u0634\u0631\u0629\n"
+        "\u2022 /ask _\u0633\u0624\u0627\u0644\u0643_ \u2014 \u0633\u0624\u0627\u0644 \u0633\u0631\u064a\u0639\n"
+        "\u2022 /build _\u0648\u0635\u0641_ \u2014 \u064a\u0628\u0646\u064a \u0643\u0648\u062f\n"
+        "\u2022 /expert _\u0627\u0633\u0645_\u200e_\u0627\u0644\u062e\u0628\u064a\u0631_ \u2014 \u064a\u0633\u062a\u0634\u064a\u0631 \u062e\u0628\u064a\u0631\n"
+        "\u2022 /status \u2014 \u062d\u0627\u0644\u0629 \u0627\u0644\u0646\u0638\u0627\u0645\n"
+        "\u2022 /tools \u2014 \u0627\u0644\u0623\u062f\u0648\u0627\u062a \u0627\u0644\u0645\u062a\u0627\u062d\u0629\n"
+        "\u2022 /agents \u2014 \u0627\u0644\u0648\u0643\u0644\u0627\u0621 \u0627\u0644\u0641\u0631\u0639\u064a\u0648\u0646\n"
+        "\u2022 /memory \u2014 \u062d\u0627\u0644\u0629 \u0627\u0644\u0630\u0627\u0643\u0631\u0629"
+    )
+
+    def __init__(self, agent):
+        self.agent = agent
+
+    async def handle(self, msg: dict, bot: TelegramBot) -> bool:
+        """معالجة رسالة واردة"""
+        if not msg:
+            return False
+
+        chat_id = msg["chat_id"]
+        username = msg["username"]
+        text = msg["text"]
+        is_callback = msg.get("is_callback", False)
+
+        # تحديث اسم المستخدم
+        self.agent.config.name = username
+
+        # Callback query
+        if is_callback:
+            return await self._handle_callback(msg, bot)
+
+        # أمر
+        cmd, arg = TelegramBot.extract_command(text)
+
+        if cmd == "/start":
+            await bot.send_message(chat_id, self.START_MSG)
+            return True
+
+        if cmd == "/help":
+            await bot.send_message(chat_id, self.HELP_MSG)
+            return True
+
+        if cmd == "/status":
+            status = self.agent.get_status()
+            status_text = (
+                f"\U0001f4ca *\u062d\u0627\u0644\u0629 Romih Agent*\n\n"
+                f"\U0001f464 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645: {status['name']}\n"
+                f"\U0001f4dd \u0627\u0644\u0645\u062d\u0627\u062f\u062b\u0629: {status['history_length']} \u0631\u0633\u0627\u0644\u0629\n"
+                f"\U0001f9e0 \u0627\u0644\u0630\u0627\u0643\u0631\u0629: {status['memory_items']} \u0639\u0646\u0635\u0631\n"
+                f"\U0001f41d \u0627\u0644\u0648\u0643\u0644\u0627\u0621: {status['swarm_agents']}\n"
+                f"\U0001f6e1 \u0645\u062d\u0627\u0648\u0644\u0627\u062a \u0627\u0644\u062a\u0642\u0637\u064a\u0631: {status['distill_attempts']}\n"
+                f"\U0001f527 \u0627\u0644\u0623\u062f\u0648\u0627\u062a: {status['tools_count']}\n"
+                f"\U0001f4a1 \u0627\u0644\u0646\u0645\u0648\u0630\u062c: {'\u0645\u062d\u0644\u064a' if status['prefer_local'] else '\u0633\u062d\u0627\u0628\u064a'}"
+            )
+            await bot.send_message(chat_id, status_text)
+            return True
+
+        if cmd == "/tools":
+            cats = self.agent.tools.list_by_category()
+            icons = {"file":"\U0001f4c1","shell":"\U0001f5a5","web":"\U0001f310","git":"\U0001f4e6",
+                     "search":"\U0001f50d","document":"\U0001f4c4","analysis":"\U0001f4ca",
+                     "creative":"\U0001f3a8","dev":"\U0001f4bb","comm":"\U0001f4e7",
+                     "productivity":"\U0001f9e0","browser":"\U0001f30d","education":"\U0001f393",
+                     "brain":"\U0001f338"}
+            lines = [f"\U0001f527 *\u0627\u0644\u0623\u062f\u0648\u0627\u062a ({len(self.agent.tools.tools)})*\n"]
+            for cat, tools in sorted(cats.items()):
+                lines.append(f"{icons.get(cat,'\U0001f527')} *{cat}* ({len(tools)})")
+            await bot.send_message(chat_id, "\n".join(lines))
+            return True
+
+        if cmd == "/expert":
+            if not arg:
+                from tools.rabie_brain import EXPERTS
+                lines = ["\U0001f393 *\u0627\u0644\u062e\u0628\u0631\u0627\u0621 \u0627\u0644\u0645\u062a\u0627\u062d\u0648\u0646:*\n"]
+                for k, e in list(EXPERTS.items())[:10]:
+                    lines.append(f"{e['icon']} *{k}* \u2014 {e['legend']}")
+                lines.append(f"\n_\u0648 {len(EXPERTS)-10} \u062e\u0628\u064a\u0631 \u0622\u062e\u0631..._")
+                lines.append("_\u0627\u0633\u062a\u062e\u062f\u0645: /expert \u0627\u0633\u0645\u200c_\u0627\u0644\u062e\u0628\u064a\u0631 \u0633\u0624\u0627\u0644\u0643_")
+                await bot.send_message(chat_id, "\n".join(lines))
+            else:
+                parts = arg.split(" ", 1)
+                expert_key = parts[0]
+                problem = parts[1] if len(parts) > 1 else ""
+                await bot.send_chat_action(chat_id)
+                from tools.rabie_brain import consult_expert
+                result = consult_expert(expert_key, problem)
+                await bot.send_message(chat_id, result)
+            return True
+
+        if cmd == "/agents":
+            if not self.agent.swarm:
+                await bot.send_message(chat_id, "\u274c \u0627\u0644\u0648\u0643\u0644\u0627\u0621 \u0627\u0644\u0641\u0631\u0639\u064a\u0648\u0646 \u063a\u064a\u0631 \u0645\u062a\u0627\u062d\u064a\u0646")
+            else:
+                agents = self.agent.swarm.list_agents()
+                lines = ["\U0001f41d *\u0627\u0644\u0648\u0643\u0644\u0627\u0621 \u0627\u0644\u0641\u0631\u0639\u064a\u0648\u0646:*\n"]
+                for a in agents:
+                    lines.append(f"\U0001f916 {a['name']}: {a['role']} ({a['model']})")
+                await bot.send_message(chat_id, "\n".join(lines))
+            return True
+
+        if cmd == "/memory":
+            if not self.agent.memory:
+                await bot.send_message(chat_id, "\u274c \u0627\u0644\u0630\u0627\u0643\u0631\u0629 \u063a\u064a\u0631 \u0645\u062a\u0627\u062d\u0629")
+            else:
+                stats = self.agent.memory.long_term.get_stats()
+                lessons = self.agent.memory.long_term.get_lessons()
+                text = f"\U0001f9e0 *\u0627\u0644\u0630\u0627\u0643\u0631\u0629:* {stats['total']} \u0639\u0646\u0635\u0631\n"
+                text += f"\U0001f4ca \u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a: {stats['categories']}\n"
+                if lessons:
+                    text += f"\n\U0001f4dd \u0622\u062e\u0631 \u062f\u0631\u0633: {lessons[-1].content[:100]}..."
+                await bot.send_message(chat_id, text)
+            return True
+
+        if cmd == "/build" and arg:
+            await bot.send_chat_action(chat_id)
+            response = await self.agent.chat(
+                f"\u0627\u0628\u0646\u064a \u0644\u064a: {arg}\n\u0623\u0639\u0637\u0646\u064a \u0627\u0644\u0643\u0648\u062f \u0627\u0644\u0643\u0627\u0645\u0644.",
+                task_type="code"
+            )
+            await bot.send_message(chat_id, response)
+            return True
+
+        if cmd == "/ask" and arg:
+            await bot.send_chat_action(chat_id)
+            response = await self.agent.chat(arg)
+            await bot.send_message(chat_id, response)
+            return True
+
+        # رسالة عادية — دردشة
+        if not cmd:
+            await bot.send_chat_action(chat_id)
+            response = await self.agent.chat(text)
+            await bot.send_message(chat_id, response)
+            return True
+
+        # أمر غير معروف
+        await bot.send_message(chat_id, f"\u2753 \u0623\u0645\u0631 \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641: {cmd}\n\u0627\u0643\u062a\u0628 /help \u0644\u0644\u0645\u0633\u0627\u0639\u062f\u0629")
+        return True
+
+    async def _handle_callback(self, msg: dict, bot: TelegramBot) -> bool:
+        """معالجة الأزرار التفاعلية"""
+        data = msg["text"]
+        chat_id = msg["chat_id"]
+        cb_id = msg.get("callback_id", "")
+
+        if data.startswith("expert:"):
+            expert_key = data.split(":", 1)[1]
+            await bot.answer_callback(cb_id, f"\u062c\u0627\u0631\u064a \u062a\u0641\u0639\u064a\u0644 {expert_key}...")
+            from tools.rabie_brain import consult_expert
+            result = consult_expert(expert_key, "")
+            await bot.send_message(chat_id, result)
+            return True
+
+        if data.startswith("tool:"):
+            tool_name = data.split(":", 1)[1]
+            await bot.answer_callback(cb_id, f"\u062c\u0627\u0631\u064a \u062a\u0646\u0641\u064a\u0630 {tool_name}...")
+            result = self.agent.tools.execute(tool_name, {}, auto_approve=True)
+            await bot.send_message(chat_id, f"\U0001f527 *{tool_name}*:\n{result}")
+            return True
+
+        await bot.answer_callback(cb_id, "\u2714")
+        return True

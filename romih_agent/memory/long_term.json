@@ -1,0 +1,197 @@
+[
+  {
+    "content": "Romih Agent built in Python",
+    "category": "fact",
+    "timestamp": 1781616920.193958,
+    "importance": 5,
+    "tags": [
+      "tech"
+    ]
+  },
+  {
+    "content": "المشكلة: PowerShell encoding broke Arabic\nالحل: Use UTF-8 wrapper",
+    "category": "lesson",
+    "timestamp": 1781616920.200283,
+    "importance": 5,
+    "tags": [
+      "lesson",
+      "repair-notebook"
+    ]
+  },
+  {
+    "content": "Q: قل مرحباً بالعربية\nA: مرحباً بك يا محمد. كيف يمكنني مساعدتك اليوم؟",
+    "category": "conversation",
+    "timestamp": 1781618005.6786282,
+    "importance": 2,
+    "tags": []
+  },
+  {
+    "content": "Romih Agent built in Python",
+    "category": "fact",
+    "timestamp": 1781618005.6859596,
+    "importance": 5,
+    "tags": [
+      "tech"
+    ]
+  },
+  {
+    "content": "Safety first — shield before action",
+    "category": "lesson",
+    "timestamp": 1781618005.6876044,
+    "importance": 5,
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "content": "User prefers Arabic responses",
+    "category": "preference",
+    "timestamp": 1781618005.6893127,
+    "importance": 4,
+    "tags": [
+      "user"
+    ]
+  },
+  {
+    "content": "المشكلة: PowerShell encoding broke Arabic\nالحل: Use UTF-8 wrapper",
+    "category": "lesson",
+    "timestamp": 1781618005.6914647,
+    "importance": 5,
+    "tags": [
+      "lesson",
+      "repair-notebook"
+    ]
+  },
+  {
+    "content": "Romih Agent built in Python",
+    "category": "fact",
+    "timestamp": 1781618528.4891977,
+    "importance": 5,
+    "tags": [
+      "tech"
+    ]
+  },
+  {
+    "content": "Safety first — shield before action",
+    "category": "lesson",
+    "timestamp": 1781618528.4949765,
+    "importance": 5,
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "content": "User prefers Arabic responses",
+    "category": "preference",
+    "timestamp": 1781618528.497013,
+    "importance": 4,
+    "tags": [
+      "user"
+    ]
+  },
+  {
+    "content": "المشكلة: PowerShell encoding broke Arabic\nالحل: Use UTF-8 wrapper",
+    "category": "lesson",
+    "timestamp": 1781618528.4987817,
+    "importance": 5,
+    "tags": [
+      "lesson",
+      "repair-notebook"
+    ]
+  },
+  {
+    "content": "Q: قل مرحباً بالعربية\nA: أهلاً بك يا محمد. كيف يمكنني مساعدتك اليوم؟",
+    "category": "conversation",
+    "timestamp": 1781618906.705696,
+    "importance": 2,
+    "tags": []
+  },
+  {
+    "content": "Romih Agent built in Python",
+    "category": "fact",
+    "timestamp": 1781618906.7082121,
+    "importance": 5,
+    "tags": [
+      "tech"
+    ]
+  },
+  {
+    "content": "Safety first — shield before action",
+    "category": "lesson",
+    "timestamp": 1781618906.7110445,
+    "importance": 5,
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "content": "User prefers Arabic responses",
+    "category": "preference",
+    "timestamp": 1781618906.7138288,
+    "importance": 4,
+    "tags": [
+      "user"
+    ]
+  },
+  {
+    "content": "المشكلة: PowerShell encoding broke Arabic\nالحل: Use UTF-8 wrapper",
+    "category": "lesson",
+    "timestamp": 1781618906.7155907,
+    "importance": 5,
+    "tags": [
+      "lesson",
+      "repair-notebook"
+    ]
+  },
+  {
+    "content": "Romih Agent built in Python",
+    "category": "fact",
+    "timestamp": 1781619286.520826,
+    "importance": 5,
+    "tags": [
+      "tech"
+    ]
+  },
+  {
+    "content": "Safety first — shield before action",
+    "category": "lesson",
+    "timestamp": 1781619286.5227983,
+    "importance": 5,
+    "tags": [
+      "safety"
+    ]
+  },
+  {
+    "content": "User prefers Arabic responses",
+    "category": "preference",
+    "timestamp": 1781619286.5244844,
+    "importance": 4,
+    "tags": [
+      "user"
+    ]
+  },
+  {
+    "content": "المشكلة: PowerShell encoding broke Arabic\nالحل: Use UTF-8 wrapper",
+    "category": "lesson",
+    "timestamp": 1781619286.5263498,
+    "importance": 5,
+    "tags": [
+      "lesson",
+      "repair-notebook"
+    ]
+  },
+  {
+    "content": "Q: Say hi in one word\nA: أهلاً.",
+    "category": "conversation",
+    "timestamp": 1781619967.7232456,
+    "importance": 2,
+    "tags": []
+  },
+  {
+    "content": "Q: مرحباً\nA: أهلاً بك محمد، كيف يمكنني مساعدتك اليوم؟",
+    "category": "conversation",
+    "timestamp": 1781621525.3117528,
+    "importance": 2,
+    "tags": []
+  }
+]
