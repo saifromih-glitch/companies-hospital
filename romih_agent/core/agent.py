@@ -78,6 +78,12 @@ class RomihAgent:
             _register_mcp(self.tools)
         except Exception:
             pass
+        # Cloud-compatible overrides (for Railway)
+        try:
+            from tools.cloud_register import register as _register_cloud
+            _register_cloud(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
