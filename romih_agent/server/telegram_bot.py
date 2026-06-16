@@ -334,6 +334,10 @@ class MessageHandler:
             await bot.send_message(chat_id, response)
             return True
 
+        if cmd == "/build":
+            await bot.send_message(chat_id, "Use: /build [project description]")
+            return True
+
         if cmd == "/ask" and arg:
             await bot.send_chat_action(chat_id)
             response = await self.agent.chat(arg)
