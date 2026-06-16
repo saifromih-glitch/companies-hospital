@@ -66,6 +66,12 @@ class RomihAgent:
             self.memory = None
             self.swarm = None
             self.tools = ToolRegistry(include_skills=False)  # أدوات بدون مهارات للوكلاء الفرعيين
+        # Agent Reach web tools (local only)
+        try:
+            from tools.agent_reach_tools import register as _register_web
+            _register_web(self.tools)
+        except Exception:
+            pass
         self.history: list[Message] = []
         self._init_system_prompt()
 
