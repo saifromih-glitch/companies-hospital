@@ -72,6 +72,12 @@ class RomihAgent:
             _register_web(self.tools)
         except Exception:
             pass
+        # MCP Connectors (databases, files)
+        try:
+            from tools.mcp_register import register as _register_mcp
+            _register_mcp(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
