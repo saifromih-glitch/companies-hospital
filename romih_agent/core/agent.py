@@ -84,6 +84,12 @@ class RomihAgent:
             _register_cloud(self.tools)
         except Exception:
             pass
+        # Workshop Plugin (enterprise CRM)
+        try:
+            from plugins.workshop_tools import register as _register_workshop
+            _register_workshop(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
