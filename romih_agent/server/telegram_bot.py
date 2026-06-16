@@ -109,8 +109,9 @@ class TelegramBot:
         payload = {
             "chat_id": chat_id,
             "text": text,
-            "parse_mode": parse_mode,
         }
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
         if reply_to:
             payload["reply_parameters"] = {"message_id": reply_to}
         try:
