@@ -62,7 +62,7 @@ class TelegramBot:
             await c.post(f"{self.base}/setMyCommands", json={"commands": commands})
 
     async def send_message(self, chat_id: int, text: str,
-                           parse_mode: str = "Markdown",
+                           parse_mode: str = None,
                            reply_to: int = None) -> dict:
         """Send a message. Detects SVG and sends as file if present."""
         if len(text) > 4000:
@@ -100,7 +100,7 @@ class TelegramBot:
         return await self._send_text(chat_id, text, parse_mode, reply_to)
 
     async def _send_text(self, chat_id: int, text: str,
-                         parse_mode: str = "Markdown",
+                         parse_mode: str = None,
                          reply_to: int = None) -> dict:
         payload = {
             "chat_id": chat_id,
