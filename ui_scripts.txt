@@ -1,0 +1,26 @@
+--- Script 1 (8471 chars) ---
+
+// ═══ STATE ═══
+let currentChat = [];
+let activeExpert = null;
+let chatHistory = [];
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadStatus();
+  await loadAgents();
+  await loadMemory();
+  await loadTools();
+  autoResize();
+});
+
+// ═══ STATUS ═══
+async function loadStatus() {
+  const r = await fetch('/romih/status');
+  const s = await r.json();
+  document.getElementById('mem-count').textContent = s.memory_items || 0;
+}
+
+// ═══ AGENTS ═══
+async function 
+...

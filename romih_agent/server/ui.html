@@ -5,465 +5,105 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Romih Agent</title>
 <style>
-/* ═══ Reset & Base ═══ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0a0f;--surface:#12121a;--glass:rgba(18,18,26,0.85);
-  --border:rgba(255,255,255,0.06);--text:#e8e8ed;--muted:#8888a0;
-  --accent:#a78bfa;--accent2:#7c3aed;--success:#34d399;--warn:#fbbf24;
-  --danger:#f87171;--radius:16px;--radius-sm:10px;--font:'Segoe UI',sans-serif;
-}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
-body{
-  background:radial-gradient(ellipse at 70% 0%,rgba(167,139,250,0.08) 0%,transparent 60%),
-             radial-gradient(ellipse at 30% 100%,rgba(124,58,237,0.05) 0%,transparent 50%),
-             var(--bg);
-}
-
-/* ═══ Layout ═══ */
-.app{display:flex;height:100vh}
-.sidebar{width:280px;background:var(--glass);backdrop-filter:blur(24px);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:10;flex-shrink:0}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.header{height:56px;background:var(--glass);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;z-index:5}
-.chat-area{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px}
-.input-area{padding:16px 24px 24px;background:linear-gradient(transparent,var(--bg) 40%)}
-
-/* ═══ Header ═══ */
-.logo{font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--accent),#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.header-actions{margin-right:auto;display:flex;gap:8px}
-
-/* ═══ Sidebar ═══ */
-.sidebar-section{padding:16px;border-bottom:1px solid var(--border)}
-.sidebar-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;font-weight:600}
-.chat-item{padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
-.chat-item.active{background:rgba(167,139,250,0.12);color:var(--accent)}
-.new-chat-btn{width:100%;padding:10px;background:rgba(167,139,250,0.1);border:1px dashed rgba(167,139,250,0.3);color:var(--accent);border-radius:var(--radius-sm);cursor:pointer;font-size:14px;transition:all .2s;text-align:center}
-.new-chat-btn:hover{background:rgba(167,139,250,0.2);border-color:var(--accent)}
-
-.agent-item,.memory-stat{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:var(--muted)}
-.agent-dot{width:6px;height:6px;border-radius:50%}
-.agent-dot.local{background:var(--accent)}
-.agent-dot.cloud{background:var(--warn)}
-.memory-count{font-weight:700;color:var(--accent);font-size:18px}
-
-/* ═══ Chat ═══ */
-.welcome{text-align:center;padding:60px 20px;animation:fadeIn .6s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.welcome-emoji{font-size:64px;margin-bottom:16px}
-.welcome-title{font-size:28px;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),#e8e8ed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.welcome-sub{color:var(--muted);font-size:15px;margin-bottom:32px}
-.suggestions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.suggestion{padding:10px 18px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.15);border-radius:20px;color:var(--accent);cursor:pointer;font-size:13px;transition:all .2s}
-.suggestion:hover{background:rgba(167,139,250,0.16);border-color:var(--accent);transform:translateY(-2px)}
-
-.message{max-width:85%;animation:slideIn .3s ease}
-@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.message.user{align-self:flex-end}
-.message.romih{align-self:flex-start}
-.msg-bubble{padding:14px 18px;border-radius:var(--radius);line-height:1.7;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
-.message.user .msg-bubble{background:linear-gradient(135deg,var(--accent2),var(--accent));color:white;border-bottom-left-radius:4px}
-.message.romih .msg-bubble{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-bottom-right-radius:4px}
-.msg-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px;color:var(--muted)}
-.message.user .msg-meta{justify-content:flex-end}
-
-/* ═══ Input ═══ */
-.input-row{display:flex;gap:10px;align-items:flex-end}
-.input-wrapper{flex:1;position:relative}
-.chat-input{width:100%;padding:14px 18px;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:15px;resize:none;outline:none;font-family:var(--font);transition:all .2s;min-height:52px;max-height:150px}
-.chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,0.1)}
-.chat-input::placeholder{color:var(--muted)}
-.send-btn{width:52px;height:52px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:white;cursor:pointer;font-size:20px;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.send-btn:hover{transform:scale(1.05);box-shadow:0 4px 20px rgba(167,139,250,0.3)}
-.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-
-.typing-indicator{display:flex;gap:4px;padding:4px 0}
-.typing-indicator span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typing 1.4s infinite}
-.typing-indicator span:nth-child(2){animation-delay:.2s}
-.typing-indicator span:nth-child(3){animation-delay:.4s}
-@keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
-
-/* ═══ Tools Panel ═══ */
-.tools-panel{position:fixed;top:56px;left:0;bottom:0;width:320px;background:var(--glass);backdrop-filter:blur(24px);border-right:1px solid var(--border);z-index:20;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:16px}
-.tools-panel.open{transform:translateX(0)}
-.tool-category{margin-bottom:20px}
-.tool-cat-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;padding:0 4px}
-.tool-btn{display:block;width:100%;padding:8px 12px;background:transparent;border:none;color:var(--text);text-align:right;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .2s;font-family:var(--font)}
-.tool-btn:hover{background:rgba(167,139,250,0.1)}
-.tool-btn .tool-icon{margin-left:8px}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:15;display:none}
-.overlay.show{display:block}
-
-/* ═══ Expert Modal ═══ */
-.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;animation:fadeIn .2s ease}
-.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
-.modal-content{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
-.modal-title{font-size:20px;font-weight:700;margin-bottom:16px}
-.modal-close{position:absolute;top:12px;left:16px;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
-.expert-card{padding:14px 16px;background:rgba(167,139,250,0.06);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .2s;border:1px solid transparent}
-.expert-card:hover{background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.2)}
-.expert-card .expert-icon{font-size:24px;margin-bottom:4px}
-.expert-card .expert-name{font-weight:600;font-size:14px;margin-bottom:2px}
-.expert-card .expert-legend{font-size:12px;color:var(--muted)}
-.expert-active{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;animation:slideIn .3s ease}
-
-/* ═══ Toast ═══ */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;z-index:50;animation:slideUp .3s ease}
-@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.toast.success{border-color:var(--success);color:var(--success)}
-.toast.error{border-color:var(--danger);color:var(--danger)}
-
-/* ═══ Confetti ═══ */
-.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:100}
-.confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:confetti-fall 2s ease-out forwards}
-@keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-
-/* ═══ Scrollbar ═══ */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.14)}
-
-/* ═══ Responsive ═══ */
-@media(max-width:768px){
-  .sidebar{display:none}
-  .tools-panel{width:100%}
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#0f0f1a;color:#e2e8f0;height:100vh;display:flex;flex-direction:column}
+.header{background:rgba(167,139,250,0.08);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(167,139,250,0.15)}
+.header-emoji{font-size:28px}
+.header h1{font-size:20px;font-weight:600}
+.header p{font-size:12px;color:#94a3b8}
+.chat{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+.msg{padding:12px 16px;border-radius:16px;max-width:85%;line-height:1.6;font-size:14px;white-space:pre-wrap}
+.msg.user{background:rgba(167,139,250,0.2);align-self:flex-end;border-bottom-right-radius:4px}
+.msg.bot{background:rgba(255,255,255,0.06);align-self:flex-start;border-bottom-left-radius:4px}
+.msg .meta{font-size:11px;color:#64748b;margin-bottom:4px}
+.typing{display:flex;gap:4px;padding:12px 16px;background:rgba(255,255,255,0.06);border-radius:16px;align-self:flex-start}
+.typing span{width:8px;height:8px;background:#94a3b8;border-radius:50%;animation:bounce 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+.input-area{padding:16px 24px;display:flex;gap:10px;border-top:1px solid rgba(167,139,250,0.15)}
+.input-area input{flex:1;padding:12px 16px;border-radius:24px;border:1px solid rgba(167,139,250,0.2);background:rgba(255,255,255,0.05);color:#e2e8f0;font-size:14px;outline:none;direction:rtl}
+.input-area input:focus{border-color:#a78bfa}
+.input-area button{background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;color:white;padding:12px 24px;border-radius:24px;cursor:pointer;font-size:14px;font-weight:600;min-width:80px}
+.input-area button:hover{opacity:0.9}
+.input-area button:disabled{opacity:0.5;cursor:default}
+.status{font-size:11px;padding:8px 24px;color:#64748b;display:flex;gap:16px}
 </style>
 </head>
 <body>
-
-<div class="app" id="app">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <button class="new-chat-btn" onclick="newChat()">+ &#1605;&#1581;&#1575;&#1583;&#1579;&#1577; &#1580;&#1583;&#1610;&#1583;&#1577;</button>
-    </div>
-    <div class="sidebar-section" style="flex:1;overflow-y:auto">
-      <div class="sidebar-title">&#1575;&#1604;&#1605;&#1581;&#1575;&#1583;&#1579;&#1575;&#1578;</div>
-      <div id="chat-list"></div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">&#1575;&#1604;&#1608;&#1603;&#1604;&#1575;&#1569; &#1575;&#1604;&#1601;&#1585;&#1593;&#1610;&#1608;&#1606;</div>
-      <div id="agents-list"></div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">&#1575;&#1604;&#1584;&#1575;&#1603;&#1585;&#1577;</div>
-      <div class="memory-stat"><span class="memory-count" id="mem-count">0</span> &#1581;&#1602;&#1610;&#1602;&#1577;</div>
-      <div class="memory-stat" style="font-size:11px" id="mem-detail"></div>
-    </div>
-  </aside>
-
-  <!-- Main -->
-  <main class="main">
-    <!-- Header -->
-    <header class="header">
-      <div class="status-dot" title="&#1606;&#1588;&#1591;"></div>
-      <span class="logo">Romih Agent</span>
-      <div class="header-actions">
-        <button class="tool-btn" onclick="toggleTools()" title="&#1575;&#1604;&#1571;&#1583;&#1608;&#1575;&#1578;" style="width:auto;padding:8px 14px;border-radius:20px;background:rgba(167,139,250,0.1)">&#9881; &#1575;&#1604;&#1571;&#1583;&#1608;&#1575;&#1578;</button>
-        <button class="tool-btn" onclick="toggleExperts()" title="&#1575;&#1604;&#1582;&#1576;&#1585;&#1575;&#1569;" style="width:auto;padding:8px 14px;border-radius:20px;background:rgba(167,139,250,0.1)">&#127891; &#1575;&#1604;&#1582;&#1576;&#1585;&#1575;&#1569;</button>
-      </div>
-    </header>
-
-    <!-- Chat -->
-    <div class="chat-area" id="chat-area">
-      <div class="welcome" id="welcome">
-        <div class="welcome-emoji">&#127800;</div>
-        <div class="welcome-title" id="welcome-title">&#1571;&#1607;&#1604;&#1575;&#1611; &#1576;&#1603; &#1601;&#1610; Romih Agent</div>
-        <div class="welcome-sub">&#1608;&#1603;&#1610;&#1604;&#1603; &#1575;&#1604;&#1584;&#1603;&#1610;. &#1610;&#1576;&#1585;&#1605;&#1580;. &#1610;&#1581;&#1604;&#1604;. &#1610;&#1576;&#1606;&#1610;. &#1610;&#1606;&#1588;&#1585;.<br>&#1605;&#1575; &#1575;&#1604;&#1605;&#1607;&#1605;&#1577; &#1575;&#1604;&#1610;&#1608;&#1605;&#1567;</div>
-        <div class="suggestions">
-          <button class="suggestion" onclick="quickAsk('&#1575;&#1576;&#1606; &#1604;&#1610; API &#1576;&#1587;&#1585;&#1593;&#1577; &#1608;&#1575;&#1581;&#1578;&#1585;&#1575;&#1601;&#1610;&#1577;')">&#128187; &#1575;&#1576;&#1606; &#1604;&#1610; API</button>
-          <button class="suggestion" onclick="quickAsk('&#1581;&#1604;&#1604; &#1587;&#1608;&#1602; &#1575;&#1604;&#1605;&#1602;&#1575;&#1608;&#1604;&#1575;&#1578; &#1601;&#1610; &#1575;&#1604;&#1587;&#1593;&#1608;&#1583;&#1610;&#1577;')">&#128202; &#1581;&#1604;&#1604; &#1587;&#1608;&#1602;</button>
-          <button class="suggestion" onclick="quickAsk('&#1589;&#1605;&#1605; &#1604;&#1610; &#1605;&#1608;&#1602;&#1593; &#1578;&#1580;&#1575;&#1585;&#1577; &#1573;&#1604;&#1603;&#1578;&#1585;&#1608;&#1606;&#1610;&#1577;')">&#127760; &#1589;&#1605;&#1605; &#1605;&#1608;&#1602;&#1593;</button>
-          <button class="suggestion" onclick="quickAsk('&#1575;&#1603;&#1578;&#1576; &#1604;&#1610; &#1582;&#1591;&#1577; &#1578;&#1587;&#1608;&#1610;&#1602; &#1604;&#1605;&#1606;&#1578;&#1580; &#1580;&#1583;&#1610;&#1583;')">&#128200; &#1582;&#1591;&#1577; &#1578;&#1587;&#1608;&#1610;&#1602;</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Input -->
-    <div class="input-area">
-      <div class="input-row">
-        <div class="input-wrapper">
-          <textarea class="chat-input" id="chat-input" rows="1" placeholder="&#1575;&#1603;&#1578;&#1576; &#1587;&#1572;&#1575;&#1604;&#1603; &#1571;&#1608; &#1605;&#1607;&#1605;&#1578;&#1603;..." onkeydown="handleKey(event)"></textarea>
-        </div>
-        <button class="send-btn" id="send-btn" onclick="sendMessage()">&#8593;</button>
-      </div>
-    </div>
-  </main>
+<div class="header">
+  <div class="header-emoji">&#127800;</div>
+  <div>
+    <h1>Romih Agent</h1>
+    <p>&#1608;&#1603;&#1610;&#1604;&#1603; &#1575;&#1604;&#1584;&#1603;&#1610;</p>
+  </div>
 </div>
-
-<!-- Tools Panel -->
-<div class="overlay" id="overlay" onclick="toggleTools()"></div>
-<div class="tools-panel" id="tools-panel"></div>
-
-<!-- Expert Modal -->
-<div class="modal" id="expert-modal" style="display:none" onclick="if(event.target===this) toggleExperts()">
-  <div class="modal-bg"></div>
-  <div class="modal-content" id="expert-content"></div>
+<div class="chat" id="chat">
+  <div class="msg bot">
+    <div class="meta">&#127800; Romih</div>
+    &#1571;&#1607;&#1604;&#1575;&#1611; &#1576;&#1603; &#1601;&#1610; Romih Agent. &#1603;&#1610;&#1601; &#1571;&#1602;&#1583;&#1585; &#1605;&#1587;&#1575;&#1593;&#1583;&#1578;&#1603;&#1567;
+  </div>
 </div>
-
-<!-- Toast -->
-<div id="toast"></div>
-<div class="confetti-container" id="confetti"></div>
-
+<div class="status" id="status">
+  <span>&#128736; 52 &#1571;&#1583;&#1575;&#1577;</span>
+  <span>&#128302; &#1580;&#1575;&#1607;&#1586;</span>
+</div>
+<div class="input-area">
+  <input type="text" id="input" placeholder="&#1575;&#1603;&#1578;&#1576; &#1585;&#1587;&#1575;&#1604;&#1578;&#1603;..." onkeypress="if(event.key==='Enter')send()" autofocus dir="rtl">
+  <button id="sendBtn" onclick="send()">&#1573;&#1585;&#1587;&#1575;&#1604;</button>
+</div>
 <script>
-// ═══ STATE ═══
-let currentChat = [];
-let activeExpert = null;
-let chatHistory = [];
+async function send(){
+  const input=document.getElementById('input');
+  const msg=input.value.trim();
+  if(!msg)return;
 
-// ═══ INIT ═══
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadStatus();
-  await loadAgents();
-  await loadMemory();
-  await loadTools();
-  autoResize();
-});
+  // Add user msg
+  addMsg('user',msg);
+  input.value='';
 
-// ═══ STATUS ═══
-async function loadStatus() {
-  const r = await fetch('/romih/status');
-  const s = await r.json();
-  document.getElementById('mem-count').textContent = s.memory_items || 0;
-}
+  // Typing
+  const tid=addTyping();
+  const btn=document.getElementById('sendBtn');
+  btn.disabled=true;
 
-// ═══ AGENTS ═══
-async function loadAgents() {
-  const r = await fetch('/romih/agents');
-  const d = await r.json();
-  const list = document.getElementById('agents-list');
-  list.innerHTML = (d.agents||[]).map(a => 
-    `<div class="agent-item"><span class="agent-dot ${a.model==='محلي'?'local':'cloud'}"></span>${a.name}: ${a.role}</div>`
-  ).join('');
-}
-
-// ═══ MEMORY ═══
-async function loadMemory() {
-  const r = await fetch('/romih/memory');
-  const m = await r.json();
-  document.getElementById('mem-detail').textContent = 
-    m.categories ? Object.entries(m.categories).map(([k,v])=>`${k}:${v}`).join(' | ') : '';
-}
-
-// ═══ TOOLS ═══
-async function loadTools() {
-  const r = await fetch('/romih/tools');
-  const d = await r.json();
-  const panel = document.getElementById('tools-panel');
-  const icons = {
-    file:'📁',shell:'🖥️',web:'🌐',git:'📦',search:'🔍',document:'📄',
-    analysis:'📊',creative:'🎨',dev:'💻',comm:'📧',productivity:'🧠',
-    browser:'🌐',education:'🎓',brain:'🌸'
-  };
-  panel.innerHTML = '<div style="padding:16px;font-size:16px;font-weight:600;margin-bottom:8px">🔧 الأدوات ('+d.total+')</div>' +
-    Object.entries(d.categories).map(([cat, tools]) => `
-      <div class="tool-category">
-        <div class="tool-cat-title">${icons[cat]||'🔧'} ${cat}</div>
-        ${tools.map(t => `<button class="tool-btn" onclick="quickAsk('استخدم أداة ${t.name}: ${t.description}')" title="${t.description}"><span class="tool-icon">${t.risk==='high'?'🟠':t.risk==='medium'?'🟡':'🟢'}</span>${t.name}</button>`).join('')}
-      </div>
-    `).join('');
-}
-
-// ═══ EXPERTS ═══
-async function toggleExperts() {
-  const modal = document.getElementById('expert-modal');
-  if (modal.style.display === 'flex') {
-    modal.style.display = 'none';
-    return;
-  }
-  const r = await fetch('/romih/experts');
-  const d = await r.json();
-  const content = document.getElementById('expert-content');
-  content.innerHTML = `
-    <div class="modal-title">🎓 الخبراء الأسطوريون (١٧)</div>
-    <div style="color:var(--muted);font-size:13px;margin-bottom:16px">اختر خبيراً لاستشارته في مشكلتك</div>
-    ${Object.entries(d.experts||{}).map(([k,e]) => `
-      <div class="expert-card" onclick="activateExpert('${k}')">
-        <div class="expert-icon">${e.icon}</div>
-        <div class="expert-name">${e.name} — ${e.legend}</div>
-        <div class="expert-legend">${e.tool}</div>
-      </div>
-    `).join('')}
-    <div class="modal-title" style="margin-top:20px">📐 المنهجيات</div>
-    ${Object.entries(d.methodologies||{}).map(([k,m]) => `
-      <div class="expert-card" onclick="quickAsk('طبق منهجية ${m.name}: ${m.description}')">
-        <div class="expert-name">${m.name}</div>
-        <div class="expert-legend">${m.description.substring(0,80)}</div>
-      </div>
-    `).join('')}
-  `;
-  modal.style.display = 'flex';
-}
-
-// ═══ ACTIVATE EXPERT ═══
-async function activateExpert(key) {
-  const r = await fetch('/romih/tools/execute', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({tool_name:'consult_expert', params:{expert_key:key, problem:''}, auto_approve:true})
-  });
-  const d = await r.json();
-  activeExpert = key;
-  document.getElementById('expert-modal').style.display = 'none';
-  // Show expert active badge
-  const header = document.querySelector('.header-actions');
-  const badge = document.createElement('span');
-  badge.id = 'expert-badge';
-  badge.style.cssText = 'padding:6px 12px;background:rgba(167,139,250,0.15);border-radius:20px;font-size:12px;color:var(--accent);animation:slideIn .3s ease';
-  badge.textContent = '🎓 خبير نشط';
-  badge.onclick = () => { activeExpert=null; badge.remove(); toast('تم إلغاء الخبير'); };
-  document.querySelector('.header-actions').appendChild(badge);
-  toast('✅ تم تفعيل الخبير');
-  // Confetti
-  spawnConfetti();
-}
-
-// ═══ SEND MESSAGE ═══
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  // Hide welcome
-  const welcome = document.getElementById('welcome');
-  if (welcome) welcome.style.display = 'none';
-
-  // Add user message
-  addMessage('user', msg);
-  input.value = '';
-  autoResize();
-
-  // Show typing
-  const typingId = addTyping();
-
-  // Send
-  const sendBtn = document.getElementById('send-btn');
-  sendBtn.disabled = true;
-
-  try {
-    const r = await fetch('/romih/chat', {
+  try{
+    const r=await fetch('/romih/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({message: msg, task_type: activeExpert ? 'reasoning' : 'chat'})
+      body:JSON.stringify({message:msg,task_type:'chat'})
     });
-    const d = await r.json();
-    removeTyping(typingId);
-    addMessage('romih', d.response);
-    await loadStatus();
-    await loadMemory();
-  } catch(e) {
-    removeTyping(typingId);
-    addMessage('romih', '❌ حدث خطأ: ' + e.message);
+    const d=await r.json();
+    removeTyping(tid);
+    addMsg('bot',d.response||'No response');
+  }catch(e){
+    removeTyping(tid);
+    addMsg('bot','Error: '+e.message);
   }
-  sendBtn.disabled = false;
+  btn.disabled=false;
 }
 
-// ═══ QUICK ASK ═══
-function quickAsk(text) {
-  document.getElementById('chat-input').value = text;
-  sendMessage();
+function addMsg(role,text){
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  const t=new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+  div.innerHTML='<div class="meta">'+(role==='bot'?'&#127800; Romih':'&#128100; &#1571;&#1606;&#1578;')+' &middot; '+t+'</div>'+text.replace(/\n/g,'<br>');
+  document.getElementById('chat').appendChild(div);
+  document.getElementById('chat').scrollTop=document.getElementById('chat').scrollHeight;
 }
 
-// ═══ ADD MESSAGE ═══
-function addMessage(role, content) {
-  const area = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = 'message ' + role;
-  const time = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
-  div.innerHTML = `
-    <div class="msg-meta">${role === 'romih' ? '🌸 Romih' : '👤 أنت'} · ${time}</div>
-    <div class="msg-bubble">${escapeHtml(content)}</div>
-  `;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-  currentChat.push({role, content});
-}
-
-// ═══ TYPING ═══
-function addTyping() {
-  const area = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = 'message romih';
-  div.id = 'typing-' + Date.now();
-  div.innerHTML = '<div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
+function addTyping(){
+  const div=document.createElement('div');
+  div.className='typing';
+  div.id='typing-'+Date.now();
+  div.innerHTML='<span></span><span></span><span></span>';
+  document.getElementById('chat').appendChild(div);
   return div.id;
 }
-function removeTyping(id) {
-  const el = document.getElementById(id);
-  if (el) el.remove();
-}
 
-// ═══ HELPERS ═══
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-function autoResize() {
-  const input = document.getElementById('chat-input');
-  input.style.height = '52px';
-  input.style.height = Math.min(input.scrollHeight, 150) + 'px';
-}
-document.addEventListener('input', autoResize);
-
-function newChat() {
-  currentChat = [];
-  document.getElementById('chat-area').innerHTML = '';
-  const welcome = document.createElement('div');
-  welcome.className = 'welcome';
-  welcome.id = 'welcome';
-  welcome.innerHTML = document.querySelector('.welcome')?.innerHTML || '';
-  document.getElementById('chat-area').appendChild(welcome);
-}
-
-function toggleTools() {
-  const panel = document.getElementById('tools-panel');
-  const overlay = document.getElementById('overlay');
-  panel.classList.toggle('open');
-  overlay.classList.toggle('show');
-}
-
-function toast(msg, type='success') {
-  const el = document.getElementById('toast');
-  el.className = 'toast ' + type;
-  el.textContent = msg;
-  setTimeout(() => el.className = '', 3000);
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function spawnConfetti() {
-  const container = document.getElementById('confetti');
-  const colors = ['#a78bfa','#7c3aed','#34d399','#fbbf24','#f87171','#60a5fa'];
-  for (let i = 0; i < 50; i++) {
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti';
-    confetti.style.left = Math.random() * 100 + '%';
-    confetti.style.background = colors[Math.floor(Math.random()*colors.length)];
-    confetti.style.animationDelay = Math.random() * 0.5 + 's';
-    confetti.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-    container.appendChild(confetti);
-    setTimeout(() => confetti.remove(), 3500);
-  }
-}
-
-// ═══ STREAM (for future) ═══
-async function streamChat(msg) {
-  // Placeholder for SSE streaming
-  return sendMessage();
+function removeTyping(id){
+  const el=document.getElementById(id);
+  if(el)el.remove();
 }
 </script>
-
 </body>
 </html>

@@ -1,0 +1,254 @@
+
+// ═══ STATE ═══
+let currentChat = [];
+let activeExpert = null;
+let chatHistory = [];
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadStatus();
+  await loadAgents();
+  await loadMemory();
+  await loadTools();
+  autoResize();
+});
+
+// ═══ STATUS ═══
+async function loadStatus() {
+  const r = await fetch('/romih/status');
+  const s = await r.json();
+  document.getElementById('mem-count').textContent = s.memory_items || 0;
+}
+
+// ═══ AGENTS ═══
+async function loadAgents() {
+  const r = await fetch('/romih/agents');
+  const d = await r.json();
+  const list = document.getElementById('agents-list');
+  list.innerHTML = (d.agents||[]).map(a => 
+    `<div class="agent-item"><span class="agent-dot ${a.model==='محلي'?'local':'cloud'}"></span>${a.name}: ${a.role}</div>`
+  ).join('');
+}
+
+// ═══ MEMORY ═══
+async function loadMemory() {
+  const r = await fetch('/romih/memory');
+  const m = await r.json();
+  document.getElementById('mem-detail').textContent = 
+    m.categories ? Object.entries(m.categories).map(([k,v])=>`${k}:${v}`).join(' | ') : '';
+}
+
+// ═══ TOOLS ═══
+async function loadTools() {
+  const r = await fetch('/romih/tools');
+  const d = await r.json();
+  const panel = document.getElementById('tools-panel');
+  const icons = {
+    file:'📁',shell:'🖥️',web:'🌐',git:'📦',search:'🔍',document:'📄',
+    analysis:'📊',creative:'🎨',dev:'💻',comm:'📧',productivity:'🧠',
+    browser:'🌐',education:'🎓',brain:'🌸'
+  };
+  panel.innerHTML = '<div style="padding:16px;font-size:16px;font-weight:600;margin-bottom:8px">🔧 الأدوات ('+d.total+')</div>' +
+    Object.entries(d.categories).map(([cat, tools]) => `
+      <div class="tool-category">
+        <div class="tool-cat-title">${icons[cat]||'🔧'} ${cat}</div>
+        ${tools.map(t => `<button class="tool-btn" onclick="quickAsk('استخدم أداة ${t.name}: ${t.description}')" title="${t.description}"><span class="tool-icon">${t.risk==='high'?'🟠':t.risk==='medium'?'🟡':'🟢'}</span>${t.name}</button>`).join('')}
+      </div>
+    `).join('');
+}
+
+// ═══ EXPERTS ═══
+async function toggleExperts() {
+  const modal = document.getElementById('expert-modal');
+  if (modal.style.display === 'flex') {
+    modal.style.display = 'none';
+    return;
+  }
+  const r = await fetch('/romih/experts');
+  const d = await r.json();
+  const content = document.getElementById('expert-content');
+  content.innerHTML = `
+    <div class="modal-title">🎓 الخبراء الأسطوريون (١٧)</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:16px">اختر خبيراً لاستشارته في مشكلتك</div>
+    ${Object.entries(d.experts||{}).map(([k,e]) => `
+      <div class="expert-card" onclick="activateExpert('${k}')">
+        <div class="expert-icon">${e.icon}</div>
+        <div class="expert-name">${e.name} — ${e.legend}</div>
+        <div class="expert-legend">${e.tool}</div>
+      </div>
+    `).join('')}
+    <div class="modal-title" style="margin-top:20px">📐 المنهجيات</div>
+    ${Object.entries(d.methodologies||{}).map(([k,m]) => `
+      <div class="expert-card" onclick="quickAsk('طبق منهجية ${m.name}: ${m.description}')">
+        <div class="expert-name">${m.name}</div>
+        <div class="expert-legend">${m.description.substring(0,80)}</div>
+      </div>
+    `).join('')}
+  `;
+  modal.style.display = 'flex';
+}
+
+// ═══ ACTIVATE EXPERT ═══
+async function activateExpert(key) {
+  const r = await fetch('/romih/tools/execute', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({tool_name:'consult_expert', params:{expert_key:key, problem:''}, auto_approve:true})
+  });
+  const d = await r.json();
+  activeExpert = key;
+  document.getElementById('expert-modal').style.display = 'none';
+  // Show expert active badge
+  const header = document.querySelector('.header-actions');
+  const badge = document.createElement('span');
+  badge.id = 'expert-badge';
+  badge.style.cssText = 'padding:6px 12px;background:rgba(167,139,250,0.15);border-radius:20px;font-size:12px;color:var(--accent);animation:slideIn .3s ease';
+  badge.textContent = '🎓 خبير نشط';
+  badge.onclick = () => { activeExpert=null; badge.remove(); toast('تم إلغاء الخبير'); };
+  document.querySelector('.header-actions').appendChild(badge);
+  toast('✅ تم تفعيل الخبير');
+  // Confetti
+  spawnConfetti();
+}
+
+// ═══ SEND MESSAGE ═══
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.style.display = 'none';
+
+  // Add user message
+  addMessage('user', msg);
+  input.value = '';
+  autoResize();
+
+  // Show typing
+  const typingId = addTyping();
+
+  // Send
+  const sendBtn = document.getElementById('send-btn');
+  sendBtn.disabled = true;
+
+  try {
+    const r = await fetch('/romih/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({message: msg, task_type: activeExpert ? 'reasoning' : 'chat'})
+    });
+    const d = await r.json();
+    removeTyping(typingId);
+    addMessage('romih', d.response);
+    await loadStatus();
+    await loadMemory();
+  } catch(e) {
+    removeTyping(typingId);
+    addMessage('romih', '❌ حدث خطأ: ' + e.message);
+  }
+  sendBtn.disabled = false;
+}
+
+// ═══ QUICK ASK ═══
+function quickAsk(text) {
+  document.getElementById('chat-input').value = text;
+  sendMessage();
+}
+
+// ═══ ADD MESSAGE ═══
+function addMessage(role, content) {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'message ' + role;
+  const time = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `
+    <div class="msg-meta">${role === 'romih' ? '🌸 Romih' : '👤 أنت'} · ${time}</div>
+    <div class="msg-bubble">${escapeHtml(content)}</div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  currentChat.push({role, content});
+}
+
+// ═══ TYPING ═══
+function addTyping() {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'message romih';
+  div.id = 'typing-' + Date.now();
+  div.innerHTML = '<div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div.id;
+}
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ═══ HELPERS ═══
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+function autoResize() {
+  const input = document.getElementById('chat-input');
+  input.style.height = '52px';
+  input.style.height = Math.min(input.scrollHeight, 150) + 'px';
+}
+document.addEventListener('input', autoResize);
+
+function newChat() {
+  currentChat = [];
+  document.getElementById('chat-area').innerHTML = '';
+  const welcome = document.createElement('div');
+  welcome.className = 'welcome';
+  welcome.id = 'welcome';
+  welcome.innerHTML = document.querySelector('.welcome')?.innerHTML || '';
+  document.getElementById('chat-area').appendChild(welcome);
+}
+
+function toggleTools() {
+  const panel = document.getElementById('tools-panel');
+  const overlay = document.getElementById('overlay');
+  panel.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  setTimeout(() => el.className = '', 3000);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function spawnConfetti() {
+  const container = document.getElementById('confetti');
+  const colors = ['#a78bfa','#7c3aed','#34d399','#fbbf24','#f87171','#60a5fa'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random()*colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    confetti.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ═══ STREAM (for future) ═══
+async function streamChat(msg) {
+  // Placeholder for SSE streaming
+  return sendMessage();
+}
