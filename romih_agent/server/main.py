@@ -1,5 +1,5 @@
 """
-Romih Agent — Web Server
+Romih Agent - Web Server
 =========================
 FastAPI backend serving the UI + API
 """
@@ -25,7 +25,7 @@ from server.telegram_bot import TelegramBot, MessageHandler
 
 app = FastAPI(title="Romih Agent", version="1.0.0")
 
-# الوكيل الرئيسي — يبدأ مرة واحدة
+# الوكيل الرئيسي - يبدأ مرة واحدة
 agent = RomihAgent(AgentConfig(name="محمد"))
 
 # Telegram Bot
@@ -102,7 +102,7 @@ async def delegate_agent(req: dict):
 # ═══ UI ═══
 
 def ae(text: str) -> str:
-    """Arabic to HTML entities — مضمون في أي بيئة"""
+    """Arabic to HTML entities - مضمون في أي بيئة"""
     return ''.join(f'&#{ord(c)};' if ord(c) > 127 else c for c in text)
 
 
@@ -166,7 +166,7 @@ async def startup():
     """تهيئة البوت عند بدء التشغيل"""
     if bot.token:
         if await bot.init():
-            print(f"🤖 Telegram Bot: @{bot.me.get('username', 'unknown')} — ready")
+            print(f"🤖 Telegram Bot: @{bot.me.get('username', 'unknown')} - ready")
             webhook_url = os.environ.get("WEBHOOK_URL", "")
             if webhook_url:
                 await bot.set_webhook(f"{webhook_url}/webhook/telegram")
@@ -179,5 +179,5 @@ async def startup():
 
 
 if __name__ == "__main__":
-    print("🌸 Romih Agent Server — http://localhost:8700")
+    print("🌸 Romih Agent Server - http://localhost:8700")
     uvicorn.run(app, host="0.0.0.0", port=8700, log_level="info")

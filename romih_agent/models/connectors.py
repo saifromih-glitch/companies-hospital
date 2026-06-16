@@ -1,5 +1,5 @@
 """
-Romih Agent — Model Connectors
+Romih Agent - Model Connectors
 ===============================
 Ollama (محلي) + OpenRouter (سحابي) + Auto Router
 """
@@ -19,7 +19,7 @@ class ModelResponse:
 
 
 class OllamaConnector:
-    """موصل Ollama — النماذج المحلية"""
+    """موصل Ollama - النماذج المحلية"""
 
     def __init__(self, base_url: str = "http://localhost:11434"):
         self.base_url = base_url
@@ -78,7 +78,7 @@ class OllamaConnector:
 
 
 class OpenRouterConnector:
-    """موصل OpenRouter — كل النماذج السحابية"""
+    """موصل OpenRouter - كل النماذج السحابية"""
 
     def __init__(self, api_key: str = ""):
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
@@ -134,7 +134,7 @@ class OpenRouterConnector:
 
 
 class AutoRouter:
-    """موجه ذكي — يختار النموذج المناسب تلقائياً"""
+    """موجه ذكي - يختار النموذج المناسب تلقائياً"""
 
     # الأولويات حسب نوع المهمة
     CODE_MODELS = {

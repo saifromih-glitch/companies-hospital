@@ -1,7 +1,7 @@
 """
-Romih Agent — Tool Registry
+Romih Agent - Tool Registry
 ============================
-سجل الأدوات — File, Shell, Web, Git, Code
+سجل الأدوات - File, Shell, Web, Git, Code
 كل أداة تمر على Safety Shield قبل التنفيذ
 """
 import os
@@ -13,9 +13,9 @@ from enum import Enum
 
 
 class RiskLevel(Enum):
-    LOW = "low"         # آمن — قراءة ملفات، list
-    MEDIUM = "medium"   # يحتاج مراقبة — كتابة ملفات، git status
-    HIGH = "high"       # يحتاج تأكيد — حذف، تشغيل أوامر
+    LOW = "low"         # آمن - قراءة ملفات، list
+    MEDIUM = "medium"   # يحتاج مراقبة - كتابة ملفات، git status
+    HIGH = "high"       # يحتاج تأكيد - حذف، تشغيل أوامر
     CRITICAL = "critical"  # ممنوع إلا بأمر مباشر
 
 
@@ -62,7 +62,7 @@ def _tool_read_file(path: str) -> str:
     with open(path, 'r', encoding='utf-8') as f:
         content = f.read()
     if len(content) > 5000:
-        content = content[:5000] + f"\n... (مقطوع — {len(content)} حرف)"
+        content = content[:5000] + f"\n... (مقطوع - {len(content)} حرف)"
     return content
 
 
@@ -144,7 +144,7 @@ def _fmt_size(size: int) -> str:
 # ═══ سجل الأدوات ═══
 
 class ToolRegistry:
-    """سجل الأدوات — يربط كل أداة بـ Safety Shield"""
+    """سجل الأدوات - يربط كل أداة بـ Safety Shield"""
 
     def __init__(self, safety_shield=None, include_skills: bool = True):
         self.tools: dict[str, Tool] = {}
@@ -434,6 +434,6 @@ class ToolRegistry:
                 f"{p.name}:{p.type}" + ("?" if not p.required else "")
                 for p in tool.params
             )
-            lines.append(f"{icon} **{tool.name}**({params_str}) — {tool.description}")
+            lines.append(f"{icon} **{tool.name}**({params_str}) - {tool.description}")
         return "\n".join(lines)
 

@@ -19,7 +19,7 @@ class Base(DeclarativeBase):
 
 
 def get_db():
-    """FastAPI dependency — yields a database session."""
+    """FastAPI dependency - yields a database session."""
     if not SessionLocal:
         raise RuntimeError("DATABASE_URL not configured")
     db = SessionLocal()

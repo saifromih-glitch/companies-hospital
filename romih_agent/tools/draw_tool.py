@@ -1,14 +1,14 @@
 """
-Romih Agent — Draw Tool (SVG & ASCII)
+Romih Agent - Draw Tool (SVG & ASCII)
 ======================================
-أداة رسم بسيطة — توليد SVG و ASCII art
+أداة رسم بسيطة - توليد SVG و ASCII art
 """
 import os, re, json, base64
 from dataclasses import dataclass
 
 @dataclass
 class DrawTool:
-    """أداة الرسم — توليد رسوم SVG و ASCII"""
+    """أداة الرسم - توليد رسوم SVG و ASCII"""
     name: str = "draw"
     description: str = "رسم تخطيطات ورسوم بيانية بسيطة (SVG/ASCII)"
     category: str = "creative"
@@ -59,5 +59,5 @@ class DrawTool:
 
     def get_tool_prompt(self) -> str:
         return """يمكنك رسم تخطيطات بسيطة عبر SVG أو ASCII art. استخدم:
-- رسم SVG: اكتب كود SVG كامل داخل ```svg ... ``` — يظهر في المتصفح
-- رسم ASCII: استخدم ```ascii ... ``` — رسم نصي بسيط"""
+- رسم SVG: اكتب كود SVG كامل داخل ```svg ... ``` - يظهر في المتصفح
+- رسم ASCII: استخدم ```ascii ... ``` - رسم نصي بسيط"""

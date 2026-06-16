@@ -1,5 +1,5 @@
 """
-Romih Agent — Sub-Agent Spawning
+Romih Agent - Sub-Agent Spawning
 =================================
 تفريخ وكلاء متخصصين للمهام المعقدة
 """
@@ -31,7 +31,7 @@ class SubAgent:
 
 
 class AgentSwarm:
-    """سرب الوكلاء — يدير الوكلاء الفرعيين"""
+    """سرب الوكلاء - يدير الوكلاء الفرعيين"""
 
     def __init__(self, orchestrator: "RomihAgent"):
         self.orchestrator = orchestrator

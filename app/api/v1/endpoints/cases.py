@@ -1,4 +1,4 @@
-"""Case endpoints — the core of Companies Hospital (Triage + Diagnosis)"""
+"""Case endpoints - the core of Companies Hospital (Triage + Diagnosis)"""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/v1/cases", tags=["cases"])
 
 
 async def _sync_llm(prompt: str) -> str:
-    """Call LLM (async) — bridge for sync expert engine."""
+    """Call LLM (async) - bridge for sync expert engine."""
     try:
         return await llm_generate(prompt)
     except Exception as e:

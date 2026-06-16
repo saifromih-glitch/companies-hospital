@@ -1,4 +1,4 @@
-"""Unified app — single page handles auth + dashboard + triage + cases"""
+"""Unified app - single page handles auth + dashboard + triage + cases"""
 from fastapi import APIRouter
 from fastapi.responses import Response
 
@@ -88,7 +88,7 @@ async def unified_app():
     triage_tab = ae("استقبال")
     cases_tab = ae("الحالات")
     welcome = ae("أهلاً بك في مستشفى الشركات")
-    dash_desc = ae("من هنا تدير كل شيء — استقبال، تشخيص، متابعة")
+    dash_desc = ae("من هنا تدير كل شيء - استقبال، تشخيص، متابعة")
     new_case_btn = ae("+ حالة جديدة")
     err_login = ae("فشل تسجيل الدخول")
     err_reg = ae("فشل إنشاء الحساب")
@@ -134,7 +134,7 @@ async def unified_app():
 
 @router.get("/demo")
 async def demo():
-    """Demo mode — no auth needed, token created on the fly."""
+    """Demo mode - no auth needed, token created on the fly."""
     import httpx
     title = ae("مستشفى الشركات - تجريبي")
     subtitle = ae("نظام تشغيل ذكي للشركات العربية")

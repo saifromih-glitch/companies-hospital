@@ -1,5 +1,5 @@
 """
-Romih Agent — Skills Adapter
+Romih Agent - Skills Adapter
 =============================
 يربط كل مهارات AutoClaw/OpenClaw كأدوات في Romih Agent
 كل مهارة = أداة قابلة للاستدعاء مع Safety Shield
@@ -20,7 +20,7 @@ BIN_DIR = os.path.expandvars(r"%USERPROFILE%\.openclaw-autoclaw\bin")
 
 @dataclass
 class SkillAdapter:
-    """محول مهارة — يجعل أي مهارة AutoClaw أداة في Romih"""
+    """محول مهارة - يجعل أي مهارة AutoClaw أداة في Romih"""
     name: str
     category: str
     description: str
@@ -60,7 +60,7 @@ ALL_SKILLS = {
     # ═══ 🔍 بحث ومعرفة ═══
     "web_search": SkillAdapter(
         "web_search", "search",
-        "بحث في الويب (16 محرك) — Google, Bing, DuckDuckGo...",
+        "بحث في الويب (16 محرك) - Google, Bing, DuckDuckGo...",
         "python", args=["-c", """
 import sys
 sys.path.insert(0, r'{workspace}')
@@ -75,7 +75,7 @@ print(r.stdout or r.stderr)
 
     "deep_research": SkillAdapter(
         "deep_research", "search",
-        "بحث أكاديمي عميق — دورتين بحث لكل موضوع مع استشهادات APA",
+        "بحث أكاديمي عميق - دورتين بحث لكل موضوع مع استشهادات APA",
         "python", args=["-c", """
 print("[Romih Deep Research] بحث عميق عن: {query}")
 print("(يستخدم autoglm-deepresearch + academic-deep-research)")
@@ -95,37 +95,37 @@ print(r.text[:5000])
     # ═══ 📄 مستندات ═══
     "create_pdf": SkillAdapter(
         "create_pdf", "document",
-        "إنشاء PDF احترافي — تقارير، عقود، عروض",
+        "إنشاء PDF احترافي - تقارير، عقود، عروض",
         "python", args=["-c", """
 print("[Romih PDF] إنشاء مستند PDF: {title}")
-print("(يستخدم مهارة pdf — ReportLab/Academic/Creative)")
+print("(يستخدم مهارة pdf - ReportLab/Academic/Creative)")
 """]
     ),
 
     "create_docx": SkillAdapter(
         "create_docx", "document",
-        "إنشاء وتحرير Word — تقارير، عقود، مراسلات",
+        "إنشاء وتحرير Word - تقارير، عقود، مراسلات",
         "python", args=["-c", """
 print("[Romih DOCX] إنشاء مستند Word: {title}")
-print("(يستخدم مهارة docx — python-docx)")
+print("(يستخدم مهارة docx - python-docx)")
 """]
     ),
 
     "create_xlsx": SkillAdapter(
         "create_xlsx", "document",
-        "إنشاء Excel — جداول، تحليل، رسوم بيانية",
+        "إنشاء Excel - جداول، تحليل، رسوم بيانية",
         "python", args=["-c", """
 print("[Romih XLSX] إنشاء ملف Excel: {title}")
-print("(يستخدم مهارة xlsx — openpyxl)")
+print("(يستخدم مهارة xlsx - openpyxl)")
 """]
     ),
 
     "create_ppt": SkillAdapter(
         "create_ppt", "document",
-        "إنشاء عروض تقديمية PPT — شرائح احترافية",
+        "إنشاء عروض تقديمية PPT - شرائح احترافية",
         "python", args=["-c", """
 print("[Romih PPT] إنشاء عرض تقديمي: {title}")
-print("(يستخدم مهارة ppt — python-pptx)")
+print("(يستخدم مهارة ppt - python-pptx)")
 """]
     ),
 
@@ -146,7 +146,7 @@ else:
     # ═══ 📊 تحليل وبيانات ═══
     "stock_analysis": SkillAdapter(
         "stock_analysis", "analysis",
-        "تحليل أسهم أمريكية — أساسي + فني + تقييم",
+        "تحليل أسهم أمريكية - أساسي + فني + تقييم",
         "python", args=["-c", """
 print("[Romih Stocks] تحليل سهم: {ticker}")
 print("(يستخدم مهارة us-stock-analysis + stock-analysis)")
@@ -155,16 +155,16 @@ print("(يستخدم مهارة us-stock-analysis + stock-analysis)")
 
     "market_research": SkillAdapter(
         "market_research", "analysis",
-        "دراسة سوق — حجم، منافسين، فرص",
+        "دراسة سوق - حجم، منافسين، فرص",
         "python", args=["-c", """
 print("[Romih Market] دراسة سوق: {topic}")
-print("(يستخدم مهارة Market Research — TAM/SAM/SOM)")
+print("(يستخدم مهارة Market Research - TAM/SAM/SOM)")
 """]
     ),
 
     "backtest_strategy": SkillAdapter(
         "backtest_strategy", "analysis",
-        "اختبار استراتيجيات تداول — Backtesting منهجي",
+        "اختبار استراتيجيات تداول - Backtesting منهجي",
         "python", args=["-c", """
 print("[Romih Backtest] اختبار استراتيجية: {strategy}")
 print("(يستخدم مهارة backtest-expert)")
@@ -174,7 +174,7 @@ print("(يستخدم مهارة backtest-expert)")
     # ═══ 🎨 إبداع وتصميم ═══
     "generate_image": SkillAdapter(
         "generate_image", "creative",
-        "توليد صور بالذكاء الاصطناعي — DALL-E, Stable Diffusion",
+        "توليد صور بالذكاء الاصطناعي - DALL-E, Stable Diffusion",
         "python", args=["-c", """
 print("[Romih Image] توليد صورة: {prompt}")
 print("(يستخدم مهارة autoglm-generate-image)")
@@ -183,7 +183,7 @@ print("(يستخدم مهارة autoglm-generate-image)")
 
     "recognize_image": SkillAdapter(
         "recognize_image", "creative",
-        "تحليل الصور — وصف، كشف كائنات، OCR",
+        "تحليل الصور - وصف، كشف كائنات، OCR",
         "python", args=["-c", """
 print("[Romih Vision] تحليل صورة: {image}")
 print("(يستخدم مهارة autoglm-image-recognition)")
@@ -192,16 +192,16 @@ print("(يستخدم مهارة autoglm-image-recognition)")
 
     "create_chart": SkillAdapter(
         "create_chart", "creative",
-        "إنشاء رسوم بيانية احترافية — matplotlib, seaborn, ECharts",
+        "إنشاء رسوم بيانية احترافية - matplotlib, seaborn, ECharts",
         "python", args=["-c", """
-print("[Romih Charts] رسم بياني: {type} — {data}")
+print("[Romih Charts] رسم بياني: {type} - {data}")
 print("(يستخدم مهارة charts)")
 """]
     ),
 
     "edit_video": SkillAdapter(
         "edit_video", "creative",
-        "تحرير فيديو — قص، ضغط، تحويل، استخراج صوت",
+        "تحرير فيديو - قص، ضغط، تحويل، استخراج صوت",
         "python", args=["-c", """
 print("[Romih FFmpeg] تحرير فيديو: {operation}")
 print("(يستخدم مهارة FFmpeg Video Editor)")
@@ -210,7 +210,7 @@ print("(يستخدم مهارة FFmpeg Video Editor)")
 
     "transcribe_audio": SkillAdapter(
         "transcribe_audio", "creative",
-        "تحويل الصوت إلى نص — Whisper، دعم العربية",
+        "تحويل الصوت إلى نص - Whisper، دعم العربية",
         "python", args=["-c", """
 print("[Romih Whisper] تفريغ صوتي: {file}")
 print("(يستخدم مهارة openai-whisper)")
@@ -220,7 +220,7 @@ print("(يستخدم مهارة openai-whisper)")
     # ═══ 💻 تطوير وبرمجة ═══
     "github_ops": SkillAdapter(
         "github_ops", "dev",
-        "إدارة GitHub — issues, PRs, actions, repos",
+        "إدارة GitHub - issues, PRs, actions, repos",
         "python", args=["-c", """
 import subprocess
 r = subprocess.run(['gh', '{operation}'], shell=True, 
@@ -231,7 +231,7 @@ print(r.stdout or r.stderr)
 
     "deploy_vercel": SkillAdapter(
         "deploy_vercel", "dev",
-        "نشر على Vercel — مواقع، APIs، بيئة إنتاج",
+        "نشر على Vercel - مواقع، APIs، بيئة إنتاج",
         "python", args=["-c", """
 print("[Romih Deploy] نشر على Vercel: {project}")
 print("(يستخدم مهارة vercel-deploy)")
@@ -240,7 +240,7 @@ print("(يستخدم مهارة vercel-deploy)")
 
     "code_with_agent": SkillAdapter(
         "code_with_agent", "dev",
-        "برمجة احترافية — TDD، Micro-diffs، CI/CD",
+        "برمجة احترافية - TDD، Micro-diffs، CI/CD",
         "python", args=["-c", """
 print("[Romih Coding] مهمة برمجية: {task}")
 print("(يستخدم مهارة Agentic Coding + cursor-agent)")
@@ -250,7 +250,7 @@ print("(يستخدم مهارة Agentic Coding + cursor-agent)")
     # ═══ 📧 تواصل ═══
     "send_email": SkillAdapter(
         "send_email", "comm",
-        "إرسال وإدارة البريد — Gmail, IMAP/SMTP",
+        "إرسال وإدارة البريد - Gmail, IMAP/SMTP",
         "python", args=["-c", """
 print("[Romih Email] إرسال بريد: {subject}")
 print("(يستخدم مهارة gmail + himalaya)")
@@ -259,7 +259,7 @@ print("(يستخدم مهارة gmail + himalaya)")
 
     "get_news": SkillAdapter(
         "get_news", "comm",
-        "أخبار AI والعالم — تجميع وتلخيص",
+        "أخبار AI والعالم - تجميع وتلخيص",
         "python", args=["-c", """
 print("[Romih News] أخبار: {topic}")
 print("(يستخدم مهارة daily-ai-news + news-aggregator)")
@@ -269,7 +269,7 @@ print("(يستخدم مهارة daily-ai-news + news-aggregator)")
     # ═══ 🧠 إنتاجية ═══
     "manage_notion": SkillAdapter(
         "manage_notion", "productivity",
-        "إدارة Notion — صفحات، قواعد بيانات، مهام",
+        "إدارة Notion - صفحات، قواعد بيانات، مهام",
         "python", args=["-c", """
 print("[Romih Notion] إدارة Notion: {action}")
 print("(يستخدم مهارة notion)")
@@ -278,7 +278,7 @@ print("(يستخدم مهارة notion)")
 
     "manage_obsidian": SkillAdapter(
         "manage_obsidian", "productivity",
-        "إدارة Obsidian — ملاحظات، روابط، رسم بياني",
+        "إدارة Obsidian - ملاحظات، روابط، رسم بياني",
         "python", args=["-c", """
 print("[Romih Obsidian] إدارة Obsidian: {action}")
 print("(يستخدم مهارة obsidian)")
@@ -287,7 +287,7 @@ print("(يستخدم مهارة obsidian)")
 
     "get_weather": SkillAdapter(
         "get_weather", "productivity",
-        "حالة الطقس — حالي + توقعات",
+        "حالة الطقس - حالي + توقعات",
         "python", args=["-c", """
 print("[Romih Weather] طقس: {city}")
 print("(يستخدم مهارة weather)")
@@ -296,26 +296,26 @@ print("(يستخدم مهارة weather)")
 
     "get_secret": SkillAdapter(
         "get_secret", "productivity",
-        "إدارة كلمات المرور — 1Password CLI",
+        "إدارة كلمات المرور - 1Password CLI",
         "python", args=["-c", """
 print("[Romih 1Password] استرجاع: {key}")
-print("(يستخدم مهارة 1password — op CLI)")
+print("(يستخدم مهارة 1password - op CLI)")
 """]
     ),
 
     # ═══ 🌐 متصفح ═══
     "browse_web": SkillAdapter(
         "browse_web", "browser",
-        "تصفح ويب آلي — فتح، تعبئة، تسجيل، شراء",
+        "تصفح ويب آلي - فتح، تعبئة، تسجيل، شراء",
         "python", args=["-c", """
-print("[Romih Browser] تصفح: {url} — {action}")
+print("[Romih Browser] تصفح: {url} - {action}")
 print("(يستخدم مهارة autoglm-browser-agent)")
 """]
     ),
 
     "download_video": SkillAdapter(
         "download_video", "browser",
-        "تحميل فيديو/صوت من YouTube وأي منصة — yt-dlp",
+        "تحميل فيديو/صوت من YouTube وأي منصة - yt-dlp",
         "python", args=["-c", """
 print("[Romih Download] تحميل: {url}")
 print("(يستخدم مهارة video-transcript-downloader)")
@@ -325,7 +325,7 @@ print("(يستخدم مهارة video-transcript-downloader)")
     # ═══ 🎓 تعليم ═══
     "create_slides": SkillAdapter(
         "create_slides", "education",
-        "عروض HTML تفاعلية — تحويل PDF/PPT لشرائح ويب",
+        "عروض HTML تفاعلية - تحويل PDF/PPT لشرائح ويب",
         "python", args=["-c", """
 print("[Romih Slides] عرض: {topic}")
 print("(يستخدم مهارة frontend-slides + glmv-pdf-to-ppt)")
@@ -343,7 +343,7 @@ print("(يستخدم مهارة frontend-design + ui-ux-pro-max)")
 
     "brainstorm": SkillAdapter(
         "brainstorm", "education",
-        "عصف ذهني منظم — أفكار، متطلبات، تصميم قبل التنفيذ",
+        "عصف ذهني منظم - أفكار، متطلبات، تصميم قبل التنفيذ",
         "python", args=["-c", """
 print("[Romih Brainstorm] عصف ذهني: {topic}")
 print("(يستخدم مهارة brainstorming)")
@@ -390,7 +390,7 @@ def get_skills_summary() -> str:
         info = SKILL_CATEGORIES.get(cat, {"icon": "🔧", "name": cat})
         lines.append(f"### {info['icon']} {info['name']} ({len(skills)}):")
         for s in skills:
-            lines.append(f"  • **{s['name']}** — {s['description'][:80]}")
+            lines.append(f"  • **{s['name']}** - {s['description'][:80]}")
         lines.append("")
     return "\n".join(lines)
 

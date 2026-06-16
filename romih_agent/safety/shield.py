@@ -1,5 +1,5 @@
 """
-Romih Agent — Safety Shield
+Romih Agent - Safety Shield
 =============================
 Anti-distillation + System Protection + Secrets Vault
 """
@@ -18,7 +18,7 @@ class SafetyDecision:
 
 
 class SafetyShield:
-    """درع الأمان — يحمي Romih Agent من الاختراق والتقطير"""
+    """درع الأمان - يحمي Romih Agent من الاختراق والتقطير"""
 
     # ❌ ممنوع نهائياً (Hard Block)
     HARD_BLOCK = [
@@ -98,7 +98,7 @@ class SafetyShield:
 
 
 class SecretsVault:
-    """خزنة الأسرار — تشفير AES-256"""
+    """خزنة الأسرار - تشفير AES-256"""
 
     def __init__(self):
         self._key = self._derive_machine_key()

@@ -1,5 +1,5 @@
 """
-Romih Agent — Minimal Router
+Romih Agent - Minimal Router
 =============================
 Lazy imports to avoid startup failures
 """
@@ -19,7 +19,7 @@ from pydantic import BaseModel
 
 router = APIRouter(prefix="/romih", tags=["Romih Agent"])
 
-# Lazy-loaded agent — only initialized when first needed
+# Lazy-loaded agent - only initialized when first needed
 _agent = None
 _bot = None
 _handler = None

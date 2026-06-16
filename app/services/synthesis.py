@@ -1,4 +1,4 @@
-"""Synthesis Engine — merges multiple expert analyses into one coherent diagnosis"""
+"""Synthesis Engine - merges multiple expert analyses into one coherent diagnosis"""
 from collections import Counter
 
 

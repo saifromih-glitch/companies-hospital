@@ -3,7 +3,7 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    """Application settings — loaded from environment variables."""
+    """Application settings - loaded from environment variables."""
     
     # App
     app_name: str = "مستشفى الشركات"

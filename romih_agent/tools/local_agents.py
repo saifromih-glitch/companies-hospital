@@ -1,7 +1,7 @@
 """
-Romih Agent — Hermes, Mimo, Pi Agent Adapters
+Romih Agent - Hermes, Mimo, Pi Agent Adapters
 ==============================================
-أدوات حقيقية — مش stub — تستدعي الأوامر مباشرة
+أدوات حقيقية - مش stub - تستدعي الأوامر مباشرة
 """
 import os
 import sys
@@ -16,7 +16,7 @@ WORKSPACE = os.path.expandvars(r"%USERPROFILE%\.openclaw-autoclaw\workspace")
 
 def hermes_code(task: str, model: str = "ollama/gemma4:12b") -> str:
     """
-    Hermes — وكيل برمجة متقدم.
+    Hermes - وكيل برمجة متقدم.
     ينفذ مهمة برمجية كاملة: تحليل → بناء → اختبار → تسليم
     """
     try:
@@ -36,19 +36,19 @@ def hermes_code(task: str, model: str = "ollama/gemma4:12b") -> str:
 
 
 def hermes_refactor(file_path: str, instructions: str) -> str:
-    """Hermes — إعادة هيكلة كود"""
+    """Hermes - إعادة هيكلة كود"""
     task = f"Refactor {file_path}: {instructions}. Keep all existing functionality."
     return hermes_code(task)
 
 
 def hermes_debug(error_log: str, file_path: str = "") -> str:
-    """Hermes — تصحيح أخطاء"""
+    """Hermes - تصحيح أخطاء"""
     task = f"Debug this error in {file_path}:\n{error_log}\nFind the root cause and fix it."
     return hermes_code(task)
 
 
 def hermes_dashboard(port: int = 9120) -> str:
-    """Hermes — فتح لوحة التحكم"""
+    """Hermes - فتح لوحة التحكم"""
     try:
         subprocess.Popen(
             f'python -m hermes_cli.main dashboard --port {port} --no-open --skip-build',
@@ -64,7 +64,7 @@ def hermes_dashboard(port: int = 9120) -> str:
 
 def mimo_plan(project_description: str) -> str:
     """
-    Mimo — تخطيط مشروع.
+    Mimo - تخطيط مشروع.
     يحلل المتطلبات ويخرج خطة تنفيذ منظمة.
     """
     try:
@@ -90,7 +90,7 @@ def mimo_plan(project_description: str) -> str:
 
 def mimo_execute(task_description: str) -> str:
     """
-    Mimo — تنفيذ خطة.
+    Mimo - تنفيذ خطة.
     يبني الكود حسب الخطة الموضوعة.
     """
     try:
@@ -112,7 +112,7 @@ def mimo_execute(task_description: str) -> str:
 
 
 def mimo_build(task: str, framework: str = "nextjs") -> str:
-    """Mimo — بناء مشروع كامل من الصفر"""
+    """Mimo - بناء مشروع كامل من الصفر"""
     full_task = f"Build a complete {framework} project:\n{task}\nInclude RTL Arabic support and HTML entities for encoding safety."
     return mimo_execute(full_task)
 
@@ -121,7 +121,7 @@ def mimo_build(task: str, framework: str = "nextjs") -> str:
 
 def pi_agent_run(task: str, tools: list[str] = None) -> str:
     """
-    Pi Agent — الوكيل الأساسي.
+    Pi Agent - الوكيل الأساسي.
     Agent Loop كامل مع أدوات.
     """
     try:
@@ -140,7 +140,7 @@ def pi_agent_run(task: str, tools: list[str] = None) -> str:
                 return f"[Pi Agent] Processing: {task_text[:200]}\n(Agent loop would execute here with tools)"
         
         runner = PiRunner()
-        return f"🔄 Pi Agent initialized — task: {task[:200]}"
+        return f"🔄 Pi Agent initialized - task: {task[:200]}"
     except ImportError:
         return "❌ Pi Agent not available"
     except Exception as e:
@@ -148,7 +148,7 @@ def pi_agent_run(task: str, tools: list[str] = None) -> str:
 
 
 def pi_agent_swarm(task: str, num_agents: int = 3) -> str:
-    """Pi Agent — تشغيل سرب وكلاء"""
+    """Pi Agent - تشغيل سرب وكلاء"""
     try:
         from pi_agent import Agent
         return f"🐝 Pi Agent Swarm: {num_agents} agents working on: {task[:200]}"
@@ -161,7 +161,7 @@ def pi_agent_swarm(task: str, num_agents: int = 3) -> str:
 HERMES_SKILLS = {
     "hermes_code": {
         "name": "hermes_code",
-        "description": "Hermes — تنفيذ مهمة برمجية كاملة (تحليل→بناء→اختبار)",
+        "description": "Hermes - تنفيذ مهمة برمجية كاملة (تحليل→بناء→اختبار)",
         "category": "dev",
         "execute": hermes_code,
         "params": [
@@ -171,7 +171,7 @@ HERMES_SKILLS = {
     },
     "hermes_refactor": {
         "name": "hermes_refactor",
-        "description": "Hermes — إعادة هيكلة وتحسين كود",
+        "description": "Hermes - إعادة هيكلة وتحسين كود",
         "category": "dev",
         "execute": hermes_refactor,
         "params": [
@@ -181,7 +181,7 @@ HERMES_SKILLS = {
     },
     "hermes_debug": {
         "name": "hermes_debug",
-        "description": "Hermes — تصحيح أخطاء من سجل الأخطاء",
+        "description": "Hermes - تصحيح أخطاء من سجل الأخطاء",
         "category": "dev",
         "execute": hermes_debug,
         "params": [
@@ -191,7 +191,7 @@ HERMES_SKILLS = {
     },
     "hermes_dashboard": {
         "name": "hermes_dashboard",
-        "description": "Hermes — فتح لوحة تحكم الوكلاء (منفذ 9120)",
+        "description": "Hermes - فتح لوحة تحكم الوكلاء (منفذ 9120)",
         "category": "dev",
         "execute": lambda **kw: hermes_dashboard(kw.get("port", 9120)),
         "params": [
@@ -203,7 +203,7 @@ HERMES_SKILLS = {
 MIMO_SKILLS = {
     "mimo_plan": {
         "name": "mimo_plan",
-        "description": "Mimo — تخطيط مشروع كامل مع تحليل المتطلبات",
+        "description": "Mimo - تخطيط مشروع كامل مع تحليل المتطلبات",
         "category": "dev",
         "execute": mimo_plan,
         "params": [
@@ -212,7 +212,7 @@ MIMO_SKILLS = {
     },
     "mimo_execute": {
         "name": "mimo_execute",
-        "description": "Mimo — تنفيذ خطة وبناء المشروع",
+        "description": "Mimo - تنفيذ خطة وبناء المشروع",
         "category": "dev",
         "execute": mimo_execute,
         "params": [
@@ -221,7 +221,7 @@ MIMO_SKILLS = {
     },
     "mimo_build": {
         "name": "mimo_build",
-        "description": "Mimo — بناء مشروع كامل من الصفر (Next.js/React)",
+        "description": "Mimo - بناء مشروع كامل من الصفر (Next.js/React)",
         "category": "dev",
         "execute": mimo_build,
         "params": [
@@ -234,7 +234,7 @@ MIMO_SKILLS = {
 PI_AGENT_SKILLS = {
     "pi_agent_run": {
         "name": "pi_agent_run",
-        "description": "Pi Agent — تشغيل Agent Loop مع أدوات",
+        "description": "Pi Agent - تشغيل Agent Loop مع أدوات",
         "category": "dev",
         "execute": pi_agent_run,
         "params": [
@@ -244,7 +244,7 @@ PI_AGENT_SKILLS = {
     },
     "pi_agent_swarm": {
         "name": "pi_agent_swarm",
-        "description": "Pi Agent — سرب وكلاء متوازي",
+        "description": "Pi Agent - سرب وكلاء متوازي",
         "category": "dev",
         "execute": pi_agent_swarm,
         "params": [
@@ -267,17 +267,17 @@ def get_local_skills_summary() -> str:
 ## 🤖 Local AI Agents (Hermes + Mimo + Pi Agent)
 
 ### Hermes Agent v0.15.2
-  • hermes_code — Full coding task: analyze → build → test
-  • hermes_refactor — Refactor and improve code
-  • hermes_debug — Debug from error logs
-  • hermes_dashboard — Web dashboard on port 9120
+  • hermes_code - Full coding task: analyze → build → test
+  • hermes_refactor - Refactor and improve code
+  • hermes_debug - Debug from error logs
+  • hermes_dashboard - Web dashboard on port 9120
 
 ### Mimo v0.1.1  
-  • mimo_plan — Project planning and requirements analysis
-  • mimo_execute — Execute plan and build project
-  • mimo_build — Build complete project from scratch
+  • mimo_plan - Project planning and requirements analysis
+  • mimo_execute - Execute plan and build project
+  • mimo_build - Build complete project from scratch
 
 ### Pi Agent v0.1.0
-  • pi_agent_run — Agent Loop with tools
-  • pi_agent_swarm — Parallel agent swarm
+  • pi_agent_run - Agent Loop with tools
+  • pi_agent_swarm - Parallel agent swarm
 """

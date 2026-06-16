@@ -1,4 +1,4 @@
-"""Expert Engine — 22 AI Experts with personas and analysis pipeline"""
+"""Expert Engine - 22 AI Experts with personas and analysis pipeline"""
 import json
 import time
 from dataclasses import dataclass, field
@@ -21,7 +21,7 @@ EXPERTS = {
         id="strategist", name_ar="المحلل الإستراتيجي", emoji="🧭",
         specialty="تحليل السوق والاستراتيجية",
         category="strategy",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 مهمتك: تحليل حالة شركة من منظور إستراتيجي.
 الشركة في قطاع: {sector} | حجم: {size}
 الحالة: {title}
@@ -32,14 +32,14 @@ EXPERTS = {
 2. الفرص والتهديدات
 3. التوصيات الإستراتيجية (٣ نقاط)
 
-أسلوبك: مايكل بورتر — Five Forces + Strategic Positioning.
+أسلوبك: مايكل بورتر - Five Forces + Strategic Positioning.
 أجب بالعربية فقط. مباشر، مختصر، بالنقاط."""
     ),
     "executive": Expert(
         id="executive", name_ar="المستشار التنفيذي", emoji="🎓",
         specialty="الإدارة التنفيذية واتخاذ القرار",
         category="strategy",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل هذه الحالة من منظور تنفيذي.
 
 الشركة: قطاع {sector} | حجم: {size}
@@ -53,7 +53,7 @@ EXPERTS = {
         id="finance_pro", name_ar="المحلل المالي", emoji="💰",
         specialty="التحليل المالي والتقييم",
         category="finance",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل الحالة من منظور مالي.
 
 الحالة: {title}
@@ -64,14 +64,14 @@ EXPERTS = {
 2. ٣ مؤشرات مالية يجب تتبعها
 3. توصيات مالية محددة
 
-أسلوبك: أسواث داموداران — DCF + WACC + NPV.
+أسلوبك: أسواث داموداران - DCF + WACC + NPV.
 أجب بالعربية. أرقام ونسب."""
     ),
     "operations": Expert(
         id="operations", name_ar="مهندس العمليات", emoji="⚙️",
         specialty="العمليات وتحسين الكفاءة",
         category="operations",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل الحالة من منظور العمليات.
 
 الحالة: {title}
@@ -82,14 +82,14 @@ EXPERTS = {
 2. القيود (Constraints)
 3. خطة تحسين من ٣ خطوات
 
-أسلوبك: إلياهو جولدرات — Theory of Constraints.
+أسلوبك: إلياهو جولدرات - Theory of Constraints.
 أجب بالعربية. عملي ومباشر."""
     ),
     "hr_pro": Expert(
         id="hr_pro", name_ar="مستشار الموارد البشرية", emoji="👥",
         specialty="الموارد البشرية والثقافة التنظيمية",
         category="hr",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل الحالة من منظور الموارد البشرية.
 
 الحالة: {title}
@@ -100,14 +100,14 @@ EXPERTS = {
 2. توصيات لتحسين الأداء والثقافة
 3. مقاييس HR المناسبة
 
-أسلوبك: لازلو بوك — People Analytics + Google 10X.
+أسلوبك: لازلو بوك - People Analytics + Google 10X.
 أجب بالعربية. مبني على البيانات."""
     ),
     "codemaster": Expert(
         id="codemaster", name_ar="مهندس التقنية", emoji="💻",
         specialty="الهندسة البرمجية والتقنية",
         category="technical",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل الحالة من منظور تقني.
 
 الحالة: {title}
@@ -118,41 +118,41 @@ EXPERTS = {
 2. حلول تقنية مقترحة
 3. تقدير التكلفة والوقت
 
-أسلوبك: مارتن فاولر — Microservices + CI/CD.
+أسلوبك: مارتن فاولر - Microservices + CI/CD.
 أجب بالعربية. تقني دقيق."""
     ),
     "legal_pro": Expert(
         id="legal_pro", name_ar="المستشار القانوني", emoji="⚖️",
         specialty="القانون والامتثال",
         category="legal",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل الحالة من منظور قانوني ونظامي.
 
 الحالة: {title}
 الوصف: {description}
 
 حلل في ٣ أبعاد: قانوني / تقني / مستقبلي.
-أسلوبك: ريتشارد سسكند — LegalTech.
+أسلوبك: ريتشارد سسكند - LegalTech.
 أجب بالعربية."""
     ),
     "growth_hacker": Expert(
         id="growth_hacker", name_ar="مستشار النمو", emoji="📈",
         specialty="النمو والتسويق",
         category="marketing",
-        prompt_template="""أنت {name} ({emoji}) — خبير {specialty}.
+        prompt_template="""أنت {name} ({emoji}) - خبير {specialty}.
 حلل حالة الشركة من منظور النمو.
 
 الحالة: {title}
 الوصف: {description}
 
 طبق Pirate Metrics (AARRR):
-1. Acquisition — اكتساب العملاء
-2. Activation — تفعيل
-3. Retention — احتفاظ
-4. Revenue — إيرادات
-5. Referral — إحالات
+1. Acquisition - اكتساب العملاء
+2. Activation - تفعيل
+3. Retention - احتفاظ
+4. Revenue - إيرادات
+5. Referral - إحالات
 
-أسلوبك: شون إليس — North Star Metric.
+أسلوبك: شون إليس - North Star Metric.
 أجب بالعربية."""
     ),
 }

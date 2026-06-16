@@ -64,19 +64,19 @@ async def get_current_user(
     request: Request,
     db: Session = Depends(get_db),
 ) -> User:
-    """FastAPI dependency — returns the authenticated user."""
+    """FastAPI dependency - returns the authenticated user."""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="يرجى تسجيل الدخول")
 
     token = auth_header.replace("Bearer ", "")
 
-    # 👇 DEMO MODE — "Bearer demo" uses first user in DB
+    # 👇 DEMO MODE - "Bearer demo" uses first user in DB
     if token == "demo":
         user = db.query(User).first()
         if user:
             return user
-        raise HTTPException(status_code=401, detail="لا يوجد مستخدم — سجل دخول أولاً")
+        raise HTTPException(status_code=401, detail="لا يوجد مستخدم - سجل دخول أولاً")
 
     payload = decode_jwt(token)
     user_id = payload.get("sub")
@@ -110,7 +110,7 @@ async def google_login():
 
 @router.get("/google/callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
-    """Handle Google OAuth callback — create/link user, return JWT."""
+    """Handle Google OAuth callback - create/link user, return JWT."""
     code = request.query_params.get("code")
     if not code:
         raise HTTPException(status_code=400, detail="رمز التفويض مفقود")

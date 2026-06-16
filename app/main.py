@@ -1,4 +1,4 @@
-"""مستشفى الشركات — FastAPI Application"""
+"""مستشفى الشركات - FastAPI Application"""
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,7 +43,7 @@ async def health():
     }
 
 
-# ═══ Static pages (embedded — no Docker encoding issues) ═══
+# ═══ Static pages (embedded - no Docker encoding issues) ═══
 try:
     from app.pages import router as pages_router
     app.include_router(pages_router)

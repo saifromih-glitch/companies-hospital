@@ -1,5 +1,5 @@
 """
-Romih Agent — Telegram Bot
+Romih Agent - Telegram Bot
 ===========================
 Webhook-based Telegram integration
 """
@@ -153,7 +153,7 @@ class TelegramBot:
 # ═══ معالج الرسائل ═══
 
 class MessageHandler:
-    """معالج رسائل Telegram — يوجهها لـ Romih Agent"""
+    """معالج رسائل Telegram - يوجهها لـ Romih Agent"""
 
     START_MSG = (
         "\U0001f338 *Romih Agent* \u2014 \u0648\u0643\u064a\u0644\u0643 \u0627\u0644\u0630\u0643\u064a\n\n"
@@ -298,7 +298,7 @@ class MessageHandler:
             await bot.send_message(chat_id, response)
             return True
 
-        # رسالة عادية — دردشة
+        # رسالة عادية - دردشة
         if not cmd:
             await bot.send_chat_action(chat_id)
             response = await self.agent.chat(text)

@@ -32,7 +32,7 @@ async def generate(prompt: str, system: str = "", model: str = None, max_tokens:
         Generated text, or error message
     """
     if not _api_key:
-        return "[OpenRouter غير مهيأ — OPENROUTER_API_KEY مفقود]"
+        return "[OpenRouter غير مهيأ - OPENROUTER_API_KEY مفقود]"
 
     model = model or DEFAULT_MODEL
 
@@ -75,7 +75,7 @@ async def generate(prompt: str, system: str = "", model: str = None, max_tokens:
                     choices = data.get("choices", [])
                     if choices:
                         return choices[0].get("message", {}).get("content", "")
-                return "[النموذج غير متاح — جرب لاحقاً]"
+                return "[النموذج غير متاح - جرب لاحقاً]"
             else:
                 err = resp.text[:200]
                 logger.error(f"OpenRouter error {resp.status_code}: {err}")
@@ -93,7 +93,7 @@ def generate_sync(prompt: str, system: str = "", model: str = None, max_tokens: 
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            # Already in an async context — use run_coroutine_threadsafe
+            # Already in an async context - use run_coroutine_threadsafe
             import concurrent.futures
             future = concurrent.futures.Future()
             async def _run():

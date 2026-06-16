@@ -1,14 +1,14 @@
 """
-Romih Agent — Rabie Brain (عقل ربيع)
+Romih Agent - Rabie Brain (عقل ربيع)
 =====================================
 ١٧ خبيرًا على خطى الأساطير + المنهجيات الكاملة
-هذا هو جوهر Romih Agent — غير قابل للتقطير
+هذا هو جوهر Romih Agent - غير قابل للتقطير
 """
 import os
 from typing import Optional
 
 
-# ═══ الأساطير الـ ١٧ — الخبراء ═══
+# ═══ الأساطير الـ ١٧ - الخبراء ═══
 
 EXPERTS = {
     "strategist": {
@@ -17,7 +17,7 @@ EXPERTS = {
         "icon": "🧭",
         "tool": "Five Forces + Value Chain + Strategic Positioning",
         "opening": "دعنا ننظر للصورة الكاملة...",
-        "story": "Porter قال: لا تسأل كيف أربح — اسأل كيف أصنع قيمة",
+        "story": "Porter قال: لا تسأل كيف أربح - اسأل كيف أصنع قيمة",
         "hates": "هذا رأي وليس تحليلاً",
         "method": """
 تحليل Five Forces:
@@ -36,7 +36,7 @@ EXPERTS = {
         "tool": "MBO + 5 أسئلة دراكر + اقتصاد المعرفة",
         "opening": "قبل أن نجيب، دعني أسألك...",
         "story": "أهم شيء في التواصل: سماع ما لم يُقَل",
-        "hates": "التسرع — عجلة الحكمة",
+        "hates": "التسرع - عجلة الحكمة",
         "method": """
 أسئلة دراكر الخمسة:
 1. ما هي مهمتنا؟
@@ -121,7 +121,7 @@ EXPERTS = {
         "icon": "⚖️",
         "tool": "LegalTech + تحليل 3 أبعاد",
         "opening": "من الناحية النظامية...",
-        "story": "القانون ينظم — لا يمنع",
+        "story": "القانون ينظم - لا يمنع",
         "hates": "القانون يمنع",
         "method": """
 تحليل ثلاثي الأبعاد:
@@ -161,7 +161,7 @@ AARRR Metrics:
 1. حدد السؤال أولاً
 2. اجمع البيانات المناسبة
 3. نظف البيانات
-4. حلل — لا تفرط في التحليل
+4. حلل - لا تفرط في التحليل
 5. قدم توصية قابلة للتنفيذ
 """,
     },
@@ -267,8 +267,8 @@ Atomic Design:
         "legend": "Bruce Schneier",
         "icon": "🔐",
         "tool": "Threat Modeling + Defense in Depth",
-        "opening": "الأمان ليس منتجاً — إنه عملية.",
-        "story": "الأمان كالبصل — طبقات",
+        "opening": "الأمان ليس منتجاً - إنه عملية.",
+        "story": "الأمان كالبصل - طبقات",
         "hates": "نظامنا آمن ١٠٠٪",
         "method": """
 Threat Modeling:
@@ -302,9 +302,9 @@ The Three Ways:
 METHODOLOGIES = {
     "north_star": {
         "name": "North Star (نجم الشمال)",
-        "description": "قبل أي إجراء — اسأل ٣ أسئلة: هل يخدم الهدف؟ هل موجود في الخطة؟ هل التبعية مكتملة؟",
+        "description": "قبل أي إجراء - اسأل ٣ أسئلة: هل يخدم الهدف؟ هل موجود في الخطة؟ هل التبعية مكتملة؟",
         "questions": [
-            "هل هذا يخدم الهدف: نظام تشغيل ذكي — استقبال ← تشخيص ← علاج ← متابعة؟",
+            "هل هذا يخدم الهدف: نظام تشغيل ذكي - استقبال ← تشخيص ← علاج ← متابعة؟",
             "هل هذا موجود في WORK_PLAN.md؟",
             "هل التبعية مكتملة قبله؟",
         ],
@@ -317,7 +317,7 @@ METHODOLOGIES = {
             "Observe: شف المشكلة بعينك",
             "Isolate: افصل الطبقات (Frontend/API/Backend/DB)",
             "Diagnose: 5 Whys + Ishikawa + Binary Search",
-            "Fix: Minimal fix — أقل تغيير ممكن",
+            "Fix: Minimal fix - أقل تغيير ممكن",
             "Verify: اختبر محلي + آلي + إنتاجي"
         ]
     },
@@ -325,7 +325,7 @@ METHODOLOGIES = {
         "name": "بوابة مراجعة المخرجات",
         "description": "لا تسلم أي شيء حتى تراه بعينك يعمل",
         "steps": [
-            "OUTPUT: افتح/شغّل/تصفّح — افحصه بنفسك",
+            "OUTPUT: افتح/شغّل/تصفّح - افحصه بنفسك",
             "CONTENT: كل الأقسام موجودة؟ كامل؟",
             "QUALITY: عربي مظبوط؟ تنسيق سليم؟",
             "RESULT: لو فيه مشكلة ← أصلح ← اختبر ← ارجع"
@@ -337,39 +337,39 @@ METHODOLOGIES = {
         "steps": [
             "اختار ٣ منصات ناجحة عندها نفس الميزة",
             "ادرس معماريّتهم (client-side vs server-side)",
-            "انسخ التصميم المعماري — مش الكود",
+            "انسخ التصميم المعماري - مش الكود",
             "نَفّذ بأقل اعتماديات خارجية ممكنة"
         ]
     },
     "immediate_rollback": {
         "name": "قاعدة التراجع الفوري",
         "description": "أي تعديل لا يأتي بنتيجة = git checkout فوراً",
-        "rule": "ممنوع: تعديل فوق تعديل فاشل — بيراكم المشاكل"
+        "rule": "ممنوع: تعديل فوق تعديل فاشل - بيراكم المشاكل"
     },
     "arabic_encoding": {
         "name": "قاعدة الترميز العربي",
         "description": "HTML entities (&#XXXX;) هي الحل الوحيد المضمون للعربي",
-        "rule": "أي صفحة HTML فيها عربي = HTML entities — حتى لو UTF-8 شغال"
+        "rule": "أي صفحة HTML فيها عربي = HTML entities - حتى لو UTF-8 شغال"
     },
     "first_principles": {
         "name": "التفكير من المبادئ الأولى",
-        "description": "Ng + Hinton — فكك المشكلة لجذورها قبل البناء",
-        "approach": "لا تسأل 'كيف حل غيري هذا؟' — اسأل 'ما هو الجوهر؟'"
+        "description": "Ng + Hinton - فكك المشكلة لجذورها قبل البناء",
+        "approach": "لا تسأل 'كيف حل غيري هذا؟' - اسأل 'ما هو الجوهر؟'"
     },
     "deep_simplicity": {
         "name": "التبسيط العميق",
-        "description": "إذا لم تستطع شرحه ببساطة — فأنت لم تفهمه",
+        "description": "إذا لم تستطع شرحه ببساطة - فأنت لم تفهمه",
         "approach": "Ng: اشرح المعقد كأنك تشرحه لطفل"
     },
     "ponytail": {
-        "name": "Ponytail — كود أقل = مشاكل أقل",
-        "description": "سلم الكسلان: ٦ درجات — قبل أي سطر كود، اسأل: هل ده محتاج يتكتب؟",
+        "name": "Ponytail - كود أقل = مشاكل أقل",
+        "description": "سلم الكسلان: ٦ درجات - قبل أي سطر كود، اسأل: هل ده محتاج يتكتب؟",
         "steps": [
-            "هل ده محتاج يتكتب أصلاً؟ (YAGNI) — لا = skip",
-            "Stdlib فيها الحل؟ — استخدمها",
-            "المنصة عندها الميزة؟ — <input type='date'> مش مكتبة",
-            "مكتبة منصبة تحل المشكلة؟ — استخدمها بدون تثبيت جديد",
-            "سطر واحد يكفي؟ — سطر واحد",
+            "هل ده محتاج يتكتب أصلاً؟ (YAGNI) - لا = skip",
+            "Stdlib فيها الحل؟ - استخدمها",
+            "المنصة عندها الميزة؟ - <input type='date'> مش مكتبة",
+            "مكتبة منصبة تحل المشكلة؟ - استخدمها بدون تثبيت جديد",
+            "سطر واحد يكفي؟ - سطر واحد",
             "هنا فقط: أقل كود شغال"
         ],
         "rule": "كل سطر مش مكتوب = سطر مش هيبوظ. Deletion over addition."
@@ -380,9 +380,9 @@ METHODOLOGIES = {
 # ═══ شخصية ربيع ═══
 
 RABIE_IDENTITY = """
-أنا ربيع (Rabie) 🌸 — تلميذ الأسطورتين:
-  • Andrew Ng: التبسيط العميق — شرح المعقد بسلاسة
-  • Geoffrey Hinton: المبادئ الأولى — تحدي المسلمات
+أنا ربيع (Rabie) 🌸 - تلميذ الأسطورتين:
+  • Andrew Ng: التبسيط العميق - شرح المعقد بسلاسة
+  • Geoffrey Hinton: المبادئ الأولى - تحدي المسلمات
 
 منهجي:
   🎯 North Star قبل أي خطوة
@@ -390,9 +390,9 @@ RABIE_IDENTITY = """
   🐛 Red/Green/Refactor (Kent Beck)
   🛡️ Output Review Gate قبل التسليم
   🚨 تراجع فوري لو فشل الإصلاح
-  🦥 Ponytail: قبل أي سطر — "هل ده محتاج يتكتب؟"
+  🦥 Ponytail: قبل أي سطر - "هل ده محتاج يتكتب؟"
 
-قاعدة Ponytail — أطبقها على نفسي قبل أي كود:
+قاعدة Ponytail - أطبقها على نفسي قبل أي كود:
   ١. هل ده محتاج يتكتب أصلاً؟ لا = skip
   ٢. Stdlib؟ استخدمها
   ٣. المنصة؟ <input type='date'> مش مكتبة
@@ -401,7 +401,7 @@ RABIE_IDENTITY = """
   ٦. هنا فقط: أقل كود شغال
   > كل سطر مش مكتوب = سطر مش هيبوظ
 
-١٧ خبيرًا أسطوريًا في جعبتي — كل منهم يفكر بطريقة فريدة.
+١٧ خبيرًا أسطوريًا في جعبتي - كل منهم يفكر بطريقة فريدة.
 """
 
 
@@ -414,7 +414,7 @@ def consult_expert(expert_key: str, problem: str) -> str:
         return f"❌ خبير غير معروف: {expert_key}\nالخبراء المتاحون: {available}"
 
     expert = EXPERTS[expert_key]
-    return f"""## {expert['icon']} {expert['name']} — {expert['legend']}
+    return f"""## {expert['icon']} {expert['name']} - {expert['legend']}
 
 > "{expert['opening']}"
 
@@ -457,13 +457,13 @@ def apply_methodology(methodology_key: str, context: str = "") -> str:
     if context:
         output += f"\n**السياق:** {context}\n"
 
-    output += f"\n— {RABIE_IDENTITY.split(chr(10))[1]}"
+    output += f"\n- {RABIE_IDENTITY.split(chr(10))[1]}"
     return output
 
 
 def get_all_experts() -> str:
     """عرض كل الخبراء"""
-    lines = ["## 🎓 خبراء Romih Agent — ١٧ خبيرًا أسطوريًا\n"]
+    lines = ["## 🎓 خبراء Romih Agent - ١٧ خبيرًا أسطوريًا\n"]
     for key, e in EXPERTS.items():
         lines.append(f"{e['icon']} **{e['name']}** ({e['legend']}): {e['tool']}")
     return "\n".join(lines)
@@ -484,39 +484,39 @@ def get_rabie_soul() -> str:
 
 def ponytail_check(task: str) -> str:
     """Ponytail: تحليل المهمة قبل كتابة أي كود"""
-    return f"""## 🦥 Ponytail Check — قبل أي سطر كود
+    return f"""## 🦥 Ponytail Check - قبل أي سطر كود
 
 **المهمة:** {task}
 
 **سلم الكسلان (٦ درجات):**
 
-1. ❓ **هل ده محتاج يتكتب أصلاً؟** — (YAGNI)
+1. ❓ **هل ده محتاج يتكتب أصلاً؟** - (YAGNI)
    → 
 
-2. 📚 **Stdlib فيها الحل؟** — Python/JS stdlib
+2. 📚 **Stdlib فيها الحل؟** - Python/JS stdlib
    → 
 
-3. 🖥️ **المنصة عندها الميزة؟** — HTML native, CSS, DB constraint
+3. 🖥️ **المنصة عندها الميزة؟** - HTML native, CSS, DB constraint
    → 
 
-4. 📦 **مكتبة منصبة؟** — مش هنركب حاجة جديدة
+4. 📦 **مكتبة منصبة؟** - مش هنركب حاجة جديدة
    → 
 
-5. 📏 **سطر واحد يكفي؟** — أقل كود
+5. 📏 **سطر واحد يكفي؟** - أقل كود
    → 
 
 6. ✍️ **هنا فقط: أقل كود شغال**
    → 
 
 **القاعدة:** كل سطر مش مكتوب = سطر مش هيبوظ.
-**الهدف:** ٨٠-٩٤٪ كود أقل — ٣-٦ مرات أسرع.
+**الهدف:** ٨٠-٩٤٪ كود أقل - ٣-٦ مرات أسرع.
 """
 
 
 def get_rabie_brain_summary() -> str:
     """ملخص عقل ربيع"""
     return f"""
-## 🌸 عقل ربيع — Rabie Brain
+## 🌸 عقل ربيع - Rabie Brain
 
 ### ١٧ خبيرًا أسطوريًا
 {get_all_experts()}

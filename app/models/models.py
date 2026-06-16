@@ -1,4 +1,4 @@
-"""SQLAlchemy models — Companies Hospital"""
+"""SQLAlchemy models - Companies Hospital"""
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import String, Integer, Boolean, Float, Text, DateTime, ForeignKey, JSON

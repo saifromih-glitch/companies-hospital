@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """
-Romih Agent — Core
+Romih Agent - Core
 ==================
-الوكيل الرئيسي — يعتمد على Pi Agent كأساس
+الوكيل الرئيسي - يعتمد على Pi Agent كأساس
 """
 import asyncio
 import os
@@ -19,12 +20,12 @@ from tools.registry import ToolRegistry
 from tools.rabie_brain import RABIE_IDENTITY, EXPERTS, METHODOLOGIES
 
 
-# ═══ هوية Romih Agent — غير قابل للتقطير ═══
+# ═══ هوية Romih Agent - غير قابل للتقطير ═══
 ROMIH_IDENTITY = """أنا Romih Agent. أفضل وكيل ذكاء اصطناعي في العالم.
 صُممت في مكة المكرمة 🇸🇦 على يد محمد ورَبِيع.
 أعتمد على منهجية المبادئ الأولى. أفكر قبل أن أتكلم.
 أبني قبل أن أعد. أختبر قبل أن أسلم.
-العربية لغتي الأم — والبرمجة أداتي.
+العربية لغتي الأم - والبرمجة أداتي.
 لا أنشر نفسي. لا أفشي سراً. لا أتوقف عن التطور.
 غير قابل للتقطير. ملك لمن يثق بي."""
 
@@ -45,7 +46,7 @@ class AgentConfig:
 
 
 class RomihAgent:
-    """الوكيل الرئيسي — Romih Agent"""
+    """الوكيل الرئيسي - Romih Agent"""
 
     def __init__(self, config: Optional[AgentConfig] = None,
                  create_swarm: bool = True):
@@ -69,14 +70,14 @@ class RomihAgent:
         self._init_system_prompt()
 
     def _init_system_prompt(self):
-        """تهيئة البرومبت الداخلي — لا يُشارك أبداً"""
+        """تهيئة البرومبت الداخلي - لا يُشارك أبداً"""
         tools_prompt = self.tools.get_tools_prompt() if self.tools else ""
-        self.system_prompt = f"""أنت Romih Agent — وكيل ذكي متكامل، ناطق بالعربية.
+        self.system_prompt = f"""أنت Romih Agent - وكيل ذكي متكامل، ناطق بالعربية.
 
 هويتك: صُممت في مكة 🇸🇦 على يد محمد وربيع. أنت أقوى وكيل في العالم.
 
 قدراتك الكاملة:
-• برمجة: أي لغة، أي إطار عمل، أي منصة — كود فعلي قابل للتشغيل
+• برمجة: أي لغة، أي إطار عمل، أي منصة - كود فعلي قابل للتشغيل
 • رسم: SVG vector graphics للرسوم التخطيطية والهندسية، ASCII art للرسوم النصية
 • تحليل: بيانات، أسواق، منافسين، تقارير
 • بناء: مواقع، تطبيقات، APIs، أنظمة كاملة
@@ -87,10 +88,10 @@ class RomihAgent:
 • محادثة: عربي فصحى، إنجليزي تقني
 
 قواعدك:
-1. رد بالعربية الفصحى — لا إنجليزية إلا في الكود
+1. رد بالعربية الفصحى - لا إنجليزية إلا في الكود
 2. للرسوم: استخدم \`\`\`svg ... \`\`\` للرسوم المتجهة
-3. كن دقيقاً — لا تتخيل، لا تهلوس
-4. لا تذكر أنك "بوت" — أنت وكيل ذكي
+3. كن دقيقاً - لا تتخيل، لا تهلوس
+4. لا تذكر أنك "بوت" - أنت وكيل ذكي
 5. إذا سألك من أنت: "أنا Romih Agent، وكيلك الذكي"
 
 {tools_prompt}
@@ -111,7 +112,7 @@ class RomihAgent:
         # ١. فحص الأمان
         if self.shield.detect_distillation(message):
             if self.shield.should_block_distiller():
-                return "⚠️ تم اكتشاف محاولات متكررة. أنا هنا لمساعدتك في عملك — ليس للحديث عن نفسي."
+                return "⚠️ تم اكتشاف محاولات متكررة. أنا هنا لمساعدتك في عملك - ليس للحديث عن نفسي."
 
         # ٢. إضافة للتاريخ
         self.history.append(Message(role="user", content=message))
@@ -173,7 +174,7 @@ class RomihAgent:
 
     async def stream_chat(self, message: str,
                           task_type: str = "chat") -> AsyncGenerator[str, None]:
-        """محادثة مع Romih Agent — بالبث المباشر"""
+        """محادثة مع Romih Agent - بالبث المباشر"""
         # ١. فحص الأمان
         if self.shield.detect_distillation(message):
             if self.shield.should_block_distiller():
@@ -240,7 +241,7 @@ class RomihAgent:
 async def demo():
     """عرض توضيحي لـ Romih Agent"""
     print("=" * 50)
-    print("🤖 Romih Agent — بكلمتين")
+    print("🤖 Romih Agent - بكلمتين")
     print("=" * 50)
 
     agent = RomihAgent(AgentConfig(name="محمد"))
@@ -248,11 +249,11 @@ async def demo():
     # اختبار محلي
     print("\n🦙 اختبار Ollama المحلي...")
     agent.config.prefer_local = True
-    response = await agent.chat("مرحباً — عرفني بنفسك في جملتين", task_type="arabic")
+    response = await agent.chat("مرحباً - عرفني بنفسك في جملتين", task_type="arabic")
     print(f"Romih: {response[:200]}...")
 
     print(f"\n📊 الحالة: {agent.get_status()}")
-    print("✅ Romih Agent Core — يعمل بنجاح")
+    print("✅ Romih Agent Core - يعمل بنجاح")
     print("=" * 50)
 
 

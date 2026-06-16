@@ -1,5 +1,5 @@
 """
-Romih Agent — Memory System
+Romih Agent - Memory System
 ============================
 ذاكرة ثلاثية المستويات: قصيرة + جلسة + طويلة المدى
 """
@@ -21,7 +21,7 @@ class MemoryItem:
 
 
 class ShortTermMemory:
-    """ذاكرة قصيرة المدى — المحادثة الحالية"""
+    """ذاكرة قصيرة المدى - المحادثة الحالية"""
 
     def __init__(self, max_items: int = 50):
         self.items: list[MemoryItem] = []
@@ -48,7 +48,7 @@ class ShortTermMemory:
 
 
 class SessionMemory:
-    """ذاكرة الجلسة — حقائق وتفضيلات"""
+    """ذاكرة الجلسة - حقائق وتفضيلات"""
 
     def __init__(self, session_id: str = ""):
         self.session_id = session_id or datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -94,7 +94,7 @@ class SessionMemory:
 
 
 class LongTermMemory:
-    """ذاكرة طويلة المدى — معرفة تراكمية"""
+    """ذاكرة طويلة المدى - معرفة تراكمية"""
 
     def __init__(self, storage_path: str = "memory/long_term.json"):
         self.storage_path = storage_path
@@ -126,7 +126,7 @@ class LongTermMemory:
         self._save()
 
     def search(self, query: str, limit: int = 5) -> list[MemoryItem]:
-        """بحث بسيط في الذاكرة (نصي — لسه هنضيف Vector DB)"""
+        """بحث بسيط في الذاكرة (نصي - لسه هنضيف Vector DB)"""
         results = []
         query_lower = query.lower()
         for item in self.knowledge:
@@ -179,7 +179,7 @@ class MemorySystem:
 
     def remember(self, content: str, category: str = "fact",
                  importance: int = 3, tags: list[str] = []):
-        """تذكر معلومة — تضاف لكل المستويات"""
+        """تذكر معلومة - تضاف لكل المستويات"""
         item = MemoryItem(
             content=content,
             category=category,

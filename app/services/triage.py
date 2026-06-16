@@ -1,4 +1,4 @@
-"""Triage Engine — analyzes and classifies incoming cases"""
+"""Triage Engine - analyzes and classifies incoming cases"""
 import re
 
 # Sector-specific keywords for smarter triage

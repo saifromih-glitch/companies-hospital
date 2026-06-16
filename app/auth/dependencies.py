@@ -22,7 +22,7 @@ async def get_current_user(
     request: Request,
     db: Session = Depends(get_db),
 ) -> User:
-    """FastAPI dependency — returns the authenticated user. Returns 401 if not authenticated."""
+    """FastAPI dependency - returns the authenticated user. Returns 401 if not authenticated."""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="يرجى تسجيل الدخول")
