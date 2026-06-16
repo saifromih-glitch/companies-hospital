@@ -4,6 +4,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+try:
+    from app.romih_router import router as romih_router
+except Exception as e:
+    romih_router = None
+    logger.warning(f"Romih Agent skipped: {e}")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,6 +50,11 @@ try:
     logger.info("Static pages registered")
 except Exception as e:
     logger.warning(f"Static pages skipped: {e}")
+
+# ═══ Romih Agent ═══
+if romih_router:
+    app.include_router(romih_router)
+    logger.info("Romih Agent registered")
 
 
 @app.on_event("startup")
