@@ -86,7 +86,17 @@ function addMsg(role,text){
   const div=document.createElement('div');
   div.className='msg '+role;
   const t=new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
-  div.innerHTML='<div class="meta">'+(role==='bot'?'&#127800; Romih':'&#128100; &#1571;&#1606;&#1578;')+' &middot; '+t+'</div>'+text.replace(/\n/g,'<br>');
+  // Check for SVG code blocks and render them
+  let html=text;
+  const svgMatch=text.match(/```svg\s*([\s\S]*?)```/);
+  if(svgMatch){
+    const svg=svgMatch[1].trim();
+    const rest=text.replace(/```svg[\s\S]*?```/,'');
+    html=(rest?rest+'<br>':'')+'<div style="background:#fff;border-radius:8px;padding:8px;margin-top:8px;max-width:100%;overflow-x:auto">'+svg+'</div>';
+  }else{
+    html=text.replace(/\n/g,'<br>');
+  }
+  div.innerHTML='<div class="meta">'+(role==='bot'?'&#127800; Romih':'&#128100; &#1571;&#1606;&#1578;')+' &middot; '+t+'</div>'+html;
   document.getElementById('chat').appendChild(div);
   document.getElementById('chat').scrollTop=document.getElementById('chat').scrollHeight;
 }
