@@ -144,7 +144,7 @@ class AutoRouter:
 
     ARABIC_MODELS = {
         "local": ["gemma4:12b"],
-        "cloud": ["qwen/qwen-3-32b", "qwen/qwen-2.5-72b-instruct", "google/gemini-2.5-flash"]
+        "cloud": ["google/gemini-2.5-flash", "google/gemini-2.5-pro"]
     }
 
     REASONING_MODELS = {
