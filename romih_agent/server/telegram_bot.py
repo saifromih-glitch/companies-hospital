@@ -65,6 +65,10 @@ class TelegramBot:
                            parse_mode: str = None,
                            reply_to: int = None) -> dict:
         """Send a message. Detects SVG and sends as file if present."""
+        # Safety: ensure text is a string
+        if not isinstance(text, str):
+            import json
+            text = json.dumps(text, ensure_ascii=False, indent=2)
         if len(text) > 4000:
             text = text[:4000] + "\n\n_(truncated...)_"
 
@@ -112,6 +116,8 @@ class TelegramBot:
         try:
             async with httpx.AsyncClient(timeout=30) as c:
                 r = await c.post(f"{self.base}/sendMessage", json=payload)
+                if r.status_code != 200:
+                    print(f"Telegram send error: {r.status_code} - {r.text[:300]}")
                 return r.json()
         except Exception as e:
             print(f"Telegram send error: {e}")
