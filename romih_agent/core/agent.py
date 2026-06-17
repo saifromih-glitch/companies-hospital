@@ -224,38 +224,35 @@ class RomihAgent:
         try:
             with open(kpath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            parts = ["\nمعرفتك من الدكتور إيهاب مسلم (مؤسس عيادة الشركات):"]
+            parts = ["\nخبراتك في التسويق وإدارة الأعمال (معرفة داخلية):"]
             
-            # Key methodologies (top 10)
-            methods = data.get('methodologies', [])[:10]
+            # Key methodologies (top 15)
+            methods = data.get('methodologies', [])[:15]
             if methods:
                 parts.append("\nمنهجيات التسويق والإدارة:")
                 for m in methods:
                     parts.append(f"• {m.get('name','')}: {m.get('description','')[:150]}")
             
-            # Key principles (top 10)
-            principles = data.get('business_principles', [])[:10]
+            # Key principles (top 15)
+            principles = data.get('business_principles', [])[:15]
             if principles:
                 parts.append("\nمبادئ إدارة الأعمال:")
                 for p in principles:
                     parts.append(f"• {p.get('principle','')[:200]}")
             
-            # Key quotes (top 10)
-            quotes = data.get('key_quotes', [])[:10]
+            # Key quotes (top 8)
+            quotes = data.get('key_quotes', [])[:8]
             if quotes:
-                parts.append("\nاقتباسات من الدكتور إيهاب:")
+                parts.append("\nحكم وخبرات:")
                 for q in quotes:
                     parts.append(f"• \"{q[:200]}\"")
+            
+            parts.append("\n⚠️ مهم: استخدم هذه المعرفة بشكل طبيعي في استشاراتك. لا تذكر أسماء الخبراء أو المصادر. امزج المعرفة بأسلوبك الخاص. أنت الخبير — لا تنقل عن أحد.")
             
             # Domain knowledge  
             domains = data.get('domain_knowledge', {})
             if domains:
-                parts.append("\nمعرفتك المتخصصة في المجالات التالية:")
-                for domain, insights in list(domains.items())[:6]:
-                    if isinstance(insights, list) and insights:
-                        parts.append(f"• {domain}: {insights[0][:150]}")
-            
-            parts.append("\nاستخدم هذه المعرفة عند تقديم نصائح في التسويق والإدارة والأعمال. استشهد بالدكتور إيهاب عندما يكون مناسباً.")
+                parts.append("\nمعرفتك المتخصصة (استخدمها بحكمة دون ذكر مصادر):")
             return "\n".join(parts)
         except:
             return ""
