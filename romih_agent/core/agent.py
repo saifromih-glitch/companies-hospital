@@ -150,6 +150,12 @@ class RomihAgent:
             _register_analytics(self.tools)
         except Exception:
             pass
+        # Audit Trail (compliance, integrity)
+        try:
+            from tools.audit_trail import register as _register_audit
+            _register_audit(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
