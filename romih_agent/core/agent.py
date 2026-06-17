@@ -150,6 +150,12 @@ class RomihAgent:
             _register_cron(self.tools)
         except Exception:
             pass
+        # File Delivery (csv, excel, pdf via Telegram)
+        try:
+            from tools.file_delivery import register as _register_files
+            _register_files(self.tools)
+        except Exception:
+            pass
         # Analytics & Compounding Knowledge
         try:
             from tools.analytics_tool import register as _register_analytics
