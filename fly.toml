@@ -2,6 +2,7 @@ app = "doctor-companies"
 primary_region = "ams"
 
 [build]
+  dockerfile = "fly.Dockerfile"
 
 [env]
   PYTHON_VERSION = "3.13"
