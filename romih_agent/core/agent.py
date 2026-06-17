@@ -168,6 +168,8 @@ class RomihAgent:
             _register_audit(self.tools)
         except Exception:
             pass
+        # Initialize diag dict BEFORE dashboard tools (used in except handler)
+        self._diag = {}
         # Dashboard customization tools
         try:
             from tools.dashboard_tools import register as _register_dash
@@ -180,7 +182,6 @@ class RomihAgent:
             from core.agent_loop import AgentLoop
             self.loop = AgentLoop(self)
         self.history: list[Message] = []
-        self._diag = {}  # diagnostic info
         self._init_system_prompt()
 
     def _init_system_prompt(self):

@@ -99,10 +99,15 @@ async def dashboard_data(user_id: str = "", industry: str = "", user_name: str =
 
 @router.get("/diag")
 async def diag():
-    agent, _, _ = _get_agent()
+    try:
+        agent, _, _ = _get_agent()
+        tools_count = len(agent.tools.tools) if agent.tools else 0
+        diag_data = getattr(agent, "_diag", {})
+    except Exception as e:
+        return {"error": str(e), "tools": 0, "diag": {}}
     return {
-        "tools": len(agent.tools.tools) if agent.tools else 0,
-        "diag": getattr(agent, "_diag", {}),
+        "tools": tools_count,
+        "diag": diag_data,
         "syspath": [p for p in sys.path if "romih" in p.lower()][:3]
     }
 
