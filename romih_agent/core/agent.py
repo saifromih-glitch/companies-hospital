@@ -168,6 +168,12 @@ class RomihAgent:
             _register_audit(self.tools)
         except Exception:
             pass
+        # Dashboard customization tools
+        try:
+            from tools.dashboard_tools import register as _register_dash
+            _register_dash(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
