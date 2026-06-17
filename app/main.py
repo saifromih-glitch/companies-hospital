@@ -2,13 +2,9 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
 from app.config import get_settings
-try:
-    from app.romih_router import router as romih_router
-except Exception as e:
-    romih_router = None
-    logger.warning(f"Romih Agent skipped: {e}")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +17,22 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url=None,
 )
+
+# ═══ Root Landing (MUST be first) ═══
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    try:
+        from app.root_landing import get_landing_html
+        return HTMLResponse(content=get_landing_html(), media_type="text/html; charset=utf-8")
+    except:
+        return HTMLResponse(content="<h1>Romih Agent</h1>", media_type="text/html; charset=utf-8")
+
+# Import Romih router
+try:
+    from app.romih_router import router as romih_router
+except Exception as e:
+    romih_router = None
+    logger.warning(f"Romih Agent skipped: {e}")
 
 # CORS
 app.add_middleware(
@@ -55,17 +67,6 @@ except Exception as e:
 if romih_router:
     app.include_router(romih_router)
     logger.info("Romih Agent registered")
-
-# ═══ Root Landing Page ═══
-try:
-    from app.root_landing import serve_root_landing, get_landing_html
-    from fastapi.responses import HTMLResponse
-    @app.get("/", response_class=HTMLResponse)
-    async def root():
-        return HTMLResponse(content=get_landing_html(), media_type="text/html; charset=utf-8")
-    logger.info("Root landing page registered")
-except Exception as e:
-    logger.warning(f"Root landing skipped: {e}")
 
 
 @app.on_event("startup")
