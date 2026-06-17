@@ -174,11 +174,11 @@ print("(يستخدم مهارة backtest-expert)")
     # ═══ 🎨 إبداع وتصميم ═══
     "generate_image": SkillAdapter(
         "generate_image", "creative",
-        "توليد صور بالذكاء الاصطناعي - DALL-E, Stable Diffusion",
-        "python", args=["-c", """
-print("[Romih Image] توليد صورة: {prompt}")
-print("(يستخدم مهارة autoglm-generate-image)")
-"""]
+        "توليد صور بالذكاء الاصطناعي - AutoGLM API حقيقي",
+        "python", args=[
+            os.path.join(SKILLS_DIR, "autoglm-generate-image", "generate-image.py"),
+            '"{prompt}"'
+        ]
     ),
 
     "recognize_image": SkillAdapter(
@@ -308,8 +308,25 @@ print("(يستخدم مهارة 1password - op CLI)")
         "browse_web", "browser",
         "تصفح ويب آلي - فتح، تعبئة، تسجيل، شراء",
         "python", args=["-c", """
-print("[Romih Browser] تصفح: {url} - {action}")
-print("(يستخدم مهارة autoglm-browser-agent)")
+import subprocess, os, sys, json
+bin_dir = os.path.expandvars(r"%USERPROFILE%\\.openclaw-autoclaw\\bin")
+autoclaw = os.path.join(bin_dir, "autoglm.exe")
+q = chr(34)
+action = {action!r}
+url = {url!r}
+task_desc = action if action else url
+cmd = f'{q}{autoclaw}{q} task={q}{task_desc}{q}'
+if url:
+    cmd += f' start_url={q}{url}{q}'
+try:
+    r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=600,
+        cwd=os.path.expandvars(r"%USERPROFILE%\\.openclaw-autoclaw\\workspace"))
+    out = r.stdout or r.stderr
+    print(out[:5000])
+except subprocess.TimeoutExpired:
+    print("[Romih Browser] Timeout after 10 min")
+except Exception as e:
+    print("[Romih Browser] Error: " + str(e))
 """]
     ),
 

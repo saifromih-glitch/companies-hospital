@@ -84,6 +84,12 @@ class RomihAgent:
             _register_cloud(self.tools)
         except Exception:
             pass
+        # Local Tools — real API implementations (AutoGLM image gen, browser, etc.)
+        try:
+            from tools.local_tools import register as _register_local_tools
+            _register_local_tools(self.tools)
+        except Exception:
+            pass
         # Workshop Plugin (enterprise CRM)
         try:
             from plugins.workshop_tools import register as _register_workshop
@@ -130,6 +136,12 @@ class RomihAgent:
         try:
             from tools.gmail_tool import register as _register_gmail
             _register_gmail(self.tools)
+        except Exception:
+            pass
+        # Cron Scheduler (reminders, recurring tasks)
+        try:
+            from tools.cron_tool import register as _register_cron
+            _register_cron(self.tools)
         except Exception:
             pass
         # Agent Loop (think-act-observe)
