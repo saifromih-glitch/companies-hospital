@@ -226,7 +226,12 @@ class MessageHandler:
 
     def __init__(self, agent):
         self.agent = agent
-        self.onboard = OnboardingInterview("onboarding_profile.json") if OnboardingInterview else None
+        self.onboard = None
+        try:
+            from plugins.onboarding import OnboardingInterview as OI
+            self.onboard = OI("onboarding_profile.json")
+        except Exception as e:
+            print(f"Onboarding not loaded: {e}")
 
     async def handle(self, msg: dict, bot: TelegramBot) -> bool:
         """معالجة رسالة واردة"""
