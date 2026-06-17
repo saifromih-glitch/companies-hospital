@@ -196,7 +196,7 @@ async def register():
     return RedirectResponse(url="/app")
 
 
-@router.get("/")
+#@router.get("/")  # disabled: Romih landing takes root
 async def landing():
     """Landing page redirects to app."""
     from fastapi.responses import RedirectResponse
