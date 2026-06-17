@@ -46,7 +46,7 @@ class ChatRequest(BaseModel):
 
 @router.get("/ping")
 async def ping():
-    return {"status": "romih", "message": "Romih Agent is alive"}
+    return {"status": "romih", "version": "v5.9", "tools": "178", "message": "Romih Agent is alive"}
 
 
 @router.get("/health")
