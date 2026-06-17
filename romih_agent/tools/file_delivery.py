@@ -26,7 +26,8 @@ def _create_csv(headers="", data="", chat_id=0, **kwargs):
     
     return {
         "ok": True,
-        "csv": csv_content[:5000],
+        "csv": csv_content,
         "filename": "romih_data.csv",
-        "message": "CSV created. Content returned inline."
+        "message": f"CSV ready. Content:\n```csv\n{csv_content[:5000]}\n```" if chat_id else \
+                   f"CSV created ({len(lines)-1} rows). Use /goal file_csv with chat_id to receive as file."
     }

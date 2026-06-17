@@ -328,6 +328,9 @@ class RomihAgent:
         # Direct tool execution: if goal matches a known tool, run it directly
         direct = self._try_direct_tool(goal)
         if direct:
+            # File delivery markers - pass through directly
+            if direct.startswith("<<<FILE_"):
+                return direct
             # Try to make it natural Arabic via synthesize
             try:
                 return await self._synthesize_direct(goal, direct)
@@ -355,11 +358,10 @@ class RomihAgent:
         return raw_result
 
     def _try_direct_tool(self, goal: str) -> Optional[str]:
-        """If goal text EXPLICITLY contains a known tool name, execute it directly.
-        Only match if the FIRST word or a clear tool call pattern is detected."""
+        """If goal text EXPLICITLY contains a known tool name, execute it directly."""
         goal_lower = goal.lower().strip()
         
-        # Skip if it's a simple response (yes/no/ok/continuation)
+        # Skip simple responses
         simple_responses = ["نعم", "yes", "لا", "no", "ok", "طيب", "تمام", "يلا", 
                           "go", "start", "اه", "ايوه", "ماشي", "حسنا", "هيا", "بنا"]
         if goal_lower in simple_responses or len(goal_lower) < 4:
@@ -377,6 +379,9 @@ class RomihAgent:
                             k, v = part.split('=', 1)
                             params[k] = v
                     result = self.tools.execute(tool_name, params, auto_approve=True)
+                    # If result contains a csv marker, pass raw dict for file delivery
+                    if isinstance(result, dict) and result.get("csv"):
+                        return "<<<FILE_CSV>>>" + json.dumps(result, ensure_ascii=False)
                     return str(result)
                 except Exception as e:
                     return f"Tool execution error: {e}"
