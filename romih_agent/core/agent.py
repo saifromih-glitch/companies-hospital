@@ -102,6 +102,12 @@ class RomihAgent:
             _register_finance(self.tools)
         except Exception:
             pass
+        # Projects Plugin (projects, tasks, milestones)
+        try:
+            from plugins.projects_tools import register as _register_projects
+            _register_projects(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
