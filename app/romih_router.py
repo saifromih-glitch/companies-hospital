@@ -141,29 +141,9 @@ async def serve_ui():
 
 @router.get("/download")
 async def download_romih():
-    """Generate and serve a ZIP of the Romih Agent for download"""
-    import zipfile, tempfile, shutil
-    romih_dir = os.path.join(_BACKEND_DIR, "romih_agent")
-    
-    # Create temp zip
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
-    with zipfile.ZipFile(tmp.name, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(romih_dir):
-            # Skip __pycache__
-            dirs[:] = [d for d in dirs if d != '__pycache__']
-            for file in files:
-                if file.endswith('.pyc') or file.endswith('.db'):
-                    continue
-                full = os.path.join(root, file)
-                arc = os.path.relpath(full, romih_dir)
-                zf.write(full, arcname=f"romih_agent/{arc}")
-    
-    return FileResponse(
-        tmp.name, 
-        media_type="application/zip",
-        filename="romih-agent-v1.0.zip",
-        headers={"Content-Disposition": "attachment; filename=romih-agent-v1.0.zip"}
-    )
+    """Redirect to GitHub download"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="https://github.com/saifromih-glitch/companies-hospital/archive/refs/heads/main.zip")
 
 
 @router.get("/landing", response_class=HTMLResponse)
