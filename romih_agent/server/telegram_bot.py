@@ -226,7 +226,7 @@ class MessageHandler:
 
     def __init__(self, agent):
         self.agent = agent
-        self.onboard = OnboardingInterview("onboarding_profile.json")
+        self.onboard = OnboardingInterview("onboarding_profile.json") if OnboardingInterview else None
 
     async def handle(self, msg: dict, bot: TelegramBot) -> bool:
         """معالجة رسالة واردة"""
@@ -249,7 +249,10 @@ class MessageHandler:
         cmd, arg = TelegramBot.extract_command(text)
 
         if cmd == "/start":
-            welcome = self.onboard.get_welcome()
+            if self.onboard:
+                welcome = self.onboard.get_welcome()
+            else:
+                welcome = self.START_MSG
             await bot.send_message(chat_id, welcome)
             return True
 
@@ -259,7 +262,10 @@ class MessageHandler:
 
         if cmd == "/onboarding":
             self.onboard.reset()
-            welcome = self.onboard.get_welcome()
+            if self.onboard:
+                welcome = self.onboard.get_welcome()
+            else:
+                welcome = self.START_MSG
             await bot.send_message(chat_id, welcome)
             return True
 
