@@ -85,8 +85,94 @@ class V2EXReader:
         except Exception as e:
             return f"V2EX error: {e}"
 
+
+@dataclass
+class TwitterReader:
+    """Search and read Twitter/X posts"""
+    name = "twitter_search"
+    description = "Search Twitter/X for posts and read tweets"
+    category = "web"
+    risk = "low"
+    
+    def execute(self, query: str = "", action: str = "search") -> str:
+        try:
+            if action == "search" and query:
+                r = subprocess.run(
+                    f'python -m agent_reach twitter search "{query}"',
+                    capture_output=True, text=True, timeout=30,
+                    shell=True
+                )
+            elif action == "read" and query:
+                r = subprocess.run(
+                    f'python -m agent_reach twitter read "{query}"',
+                    capture_output=True, text=True, timeout=30,
+                    shell=True
+                )
+            else:
+                return "Usage: twitter_search(query='keyword')"
+            return (r.stdout or r.stderr or "No results")[:3000]
+        except Exception as e:
+            return f"Twitter search error: {e}"
+
+@dataclass
+class RedditReader:
+    """Search and read Reddit posts"""
+    name = "reddit_search"
+    description = "Search Reddit for posts and read threads/comments"
+    category = "web"
+    risk = "low"
+    
+    def execute(self, query: str = "", subreddit: str = "", action: str = "search") -> str:
+        try:
+            if action == "search" and query:
+                r = subprocess.run(
+                    f'python -m agent_reach reddit search "{query}"',
+                    capture_output=True, text=True, timeout=30,
+                    shell=True
+                )
+            elif action == "hot" and subreddit:
+                r = subprocess.run(
+                    f'python -m agent_reach reddit hot -s {subreddit}',
+                    capture_output=True, text=True, timeout=30,
+                    shell=True
+                )
+            elif action == "read" and query:
+                r = subprocess.run(
+                    f'python -m agent_reach reddit read "{query}"',
+                    capture_output=True, text=True, timeout=30,
+                    shell=True
+                )
+            else:
+                return "Usage: reddit_search(query) or reddit_search(subreddit, action=hot)"
+            return (r.stdout or r.stderr or "No results")[:3000]
+        except Exception as e:
+            return f"Reddit search error: {e}"
+
+@dataclass
+class RSSReader:
+    """Read RSS/Atom feeds"""
+    name = "rss_read"
+    description = "Read RSS/Atom feeds from any URL"
+    category = "web"
+    risk = "low"
+    
+    def execute(self, url: str = "", action: str = "read") -> str:
+        try:
+            if action == "read" and url:
+                r = subprocess.run(
+                    f'python -m agent_reach rss read "{url}"',
+                    capture_output=True, text=True, timeout=30,
+                    shell=True
+                )
+            else:
+                return "Usage: rss_read(url='https://example.com/feed.xml')"
+            return (r.stdout or r.stderr or "No RSS results")[:3000]
+        except Exception as e:
+            return f"RSS error: {e}"
+
+
 # Register all tools
-AGENT_REACH_TOOLS = [WebReader, YouTubeReader, GitHubReader, V2EXReader]
+AGENT_REACH_TOOLS = [WebReader, YouTubeReader, GitHubReader, V2EXReader, TwitterReader, RedditReader, RSSReader]
 
 def register(registry):
     """Register Agent Reach tools in the tool registry"""
