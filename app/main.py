@@ -56,6 +56,17 @@ if romih_router:
     app.include_router(romih_router)
     logger.info("Romih Agent registered")
 
+# ═══ Root Landing Page ═══
+try:
+    from app.root_landing import serve_root_landing, get_landing_html
+    from fastapi.responses import HTMLResponse
+    @app.get("/", response_class=HTMLResponse)
+    async def root():
+        return HTMLResponse(content=get_landing_html(), media_type="text/html; charset=utf-8")
+    logger.info("Root landing page registered")
+except Exception as e:
+    logger.warning(f"Root landing skipped: {e}")
+
 
 @app.on_event("startup")
 async def startup():
