@@ -96,6 +96,12 @@ class RomihAgent:
             _register_hr(self.tools)
         except Exception:
             pass
+        # Finance Plugin (invoices, expenses, accounts)
+        try:
+            from plugins.finance_tools import register as _register_finance
+            _register_finance(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
