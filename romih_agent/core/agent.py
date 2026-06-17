@@ -114,6 +114,12 @@ class RomihAgent:
             _register_umrah(self.tools)
         except Exception:
             pass
+        # Hotels Plugin (properties, rooms, bookings, maintenance)
+        try:
+            from plugins.hotels_tools import register as _register_hotels
+            _register_hotels(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
