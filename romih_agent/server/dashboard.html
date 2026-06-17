@@ -67,9 +67,14 @@ function render(s, t, w, m){
   var cats = {};
   var toolsTotal = t.total || 0;
   if(t.categories){
+    // API returns full tool objects: {name, description, category, risk, params}
     Object.keys(t.categories).forEach(function(cat){
-      var names = t.categories[cat];
-      cats[cat] = names.map(function(n){ return {name: n, category: cat, risk: 'low'}; });
+      var items = t.categories[cat];
+      if(items.length > 0 && typeof items[0] === 'object'){
+        cats[cat] = items; // already have name/category/risk
+      } else {
+        cats[cat] = items.map(function(n){ return {name: n, category: cat, risk: 'low'}; });
+      }
     });
   } else if(t.tools) {
     (t.tools || []).forEach(function(t2){
