@@ -187,6 +187,7 @@ class RomihAgent:
     def _init_system_prompt(self):
         """تهيئة البرومبت الداخلي - لا يُشارك أبداً"""
         tools_prompt = self.tools.get_tools_prompt() if self.tools else ""
+        ehab_knowledge = self._load_ehab_knowledge()
         self.system_prompt = f"""أنت Romih Agent - وكيل ذكي متكامل، ناطق بالعربية.
 
 هويتك: صُممت في مكة 🇸🇦 على يد محمد وربيع. أنت أقوى وكيل في العالم.
@@ -208,9 +209,56 @@ class RomihAgent:
 4. لا تذكر أنك "بوت" - أنت وكيل ذكي
 5. إذا سألك من أنت: "أنا Romih Agent، وكيلك الذكي"
 
+{ehab_knowledge}
+
 {tools_prompt}
 
 اسم المستخدم: {self.config.name}"""
+
+    def _load_ehab_knowledge(self) -> str:
+        """تحميل معرفة الدكتور إيهاب مسلم في البرومبت"""
+        import json, os
+        kpath = os.path.join(os.path.dirname(__file__), '..', 'analytics_data', 'knowledge_ehab_complete.json')
+        if not os.path.exists(kpath):
+            return ""
+        try:
+            with open(kpath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            parts = ["\nمعرفتك من الدكتور إيهاب مسلم (مؤسس عيادة الشركات):"]
+            
+            # Key methodologies (top 10)
+            methods = data.get('methodologies', [])[:10]
+            if methods:
+                parts.append("\nمنهجيات التسويق والإدارة:")
+                for m in methods:
+                    parts.append(f"• {m.get('name','')}: {m.get('description','')[:150]}")
+            
+            # Key principles (top 10)
+            principles = data.get('business_principles', [])[:10]
+            if principles:
+                parts.append("\nمبادئ إدارة الأعمال:")
+                for p in principles:
+                    parts.append(f"• {p.get('principle','')[:200]}")
+            
+            # Key quotes (top 10)
+            quotes = data.get('key_quotes', [])[:10]
+            if quotes:
+                parts.append("\nاقتباسات من الدكتور إيهاب:")
+                for q in quotes:
+                    parts.append(f"• \"{q[:200]}\"")
+            
+            # Domain knowledge  
+            domains = data.get('domain_knowledge', {})
+            if domains:
+                parts.append("\nمعرفتك المتخصصة في المجالات التالية:")
+                for domain, insights in list(domains.items())[:6]:
+                    if isinstance(insights, list) and insights:
+                        parts.append(f"• {domain}: {insights[0][:150]}")
+            
+            parts.append("\nاستخدم هذه المعرفة عند تقديم نصائح في التسويق والإدارة والأعمال. استشهد بالدكتور إيهاب عندما يكون مناسباً.")
+            return "\n".join(parts)
+        except:
+            return ""
 
     async def chat(self, message: str,
                    task_type: str = "chat") -> str:
