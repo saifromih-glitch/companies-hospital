@@ -244,7 +244,7 @@ class MessageHandler:
         is_callback = msg.get("is_callback", False)
 
         # تحديث اسم المستخدم
-        self.agent.config.name = username
+        self.agent.config.name = msg.get("first_name", username)
 
         # Callback query
         if is_callback:
