@@ -108,6 +108,12 @@ class RomihAgent:
             _register_projects(self.tools)
         except Exception:
             pass
+        # Umrah Plugin (packages, pilgrims, groups, transport)
+        try:
+            from plugins.umrah_tools import register as _register_umrah
+            _register_umrah(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
