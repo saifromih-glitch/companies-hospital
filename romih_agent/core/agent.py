@@ -349,13 +349,21 @@ class RomihAgent:
         return raw_result
 
     def _try_direct_tool(self, goal: str) -> Optional[str]:
-        """If goal text contains a known tool name, execute it directly"""
+        """If goal text EXPLICITLY contains a known tool name, execute it directly.
+        Only match if the FIRST word or a clear tool call pattern is detected."""
         goal_lower = goal.lower().strip()
+        
+        # Skip if it's a simple response (yes/no/ok/continuation)
+        simple_responses = ["نعم", "yes", "لا", "no", "ok", "طيب", "تمام", "يلا", 
+                          "go", "start", "اه", "ايوه", "ماشي", "حسنا", "هيا", "بنا"]
+        if goal_lower in simple_responses or len(goal_lower) < 4:
+            return None
+        
+        # Only match if first word is a known tool name
+        first_word = goal_lower.split()[0] if ' ' in goal_lower else goal_lower
         for tool_name in self.tools.tools:
-            if tool_name in goal_lower:
+            if first_word == tool_name or goal_lower.startswith(tool_name + ' '):
                 try:
-                    # Extract params from goal text
-                    # Pattern: tool_name key=value key2=value2
                     params = {}
                     parts = goal.split()
                     for part in parts[1:]:
