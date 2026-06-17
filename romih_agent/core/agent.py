@@ -90,6 +90,12 @@ class RomihAgent:
             _register_workshop(self.tools)
         except Exception:
             pass
+        # HR Plugin (employees, leaves, payroll)
+        try:
+            from plugins.hr_tools import register as _register_hr
+            _register_hr(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
