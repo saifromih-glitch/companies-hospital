@@ -1,0 +1,1 @@
+{'ok': True, 'affected': 1, 'last_id': 3}

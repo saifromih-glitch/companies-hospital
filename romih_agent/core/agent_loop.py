@@ -165,15 +165,11 @@ Rules:
         return len(results) >= 3  # Max 3 steps per goal
     
     async def _synthesize(self, goal: str, plan: ExecutionPlan, results: list) -> str:
-        """Synthesize all results into a final answer"""
+        """Synthesize all results into a final Arabic answer"""
         if not results:
             return await self._fallback_chat(goal)
         
-        # For simple chains (1 result), just return it
-        if len(results) == 1:
-            return str(results[0])
-        
-        # For multi-step, ask LLM to synthesize
+        # Always synthesize via LLM for natural Arabic response
         try:
             model_id, _ = await self.agent.router.route(task_type="arabic")
             steps_summary = "\n".join([
@@ -181,13 +177,22 @@ Rules:
                 for i, (s, r) in enumerate(zip(plan.steps, results))
             ])
             messages = [
-                {"role": "system", "content": "You are a helpful assistant. Synthesize information into a clear Arabic response."},
-                {"role": "user", "content": f"Goal: {goal}\n\nSteps executed:\n{steps_summary}\n\nProvide a clear final answer in Arabic."}
+                {"role": "system", "content": "You are a helpful Arabic assistant. Convert technical results into a natural, friendly Arabic response. Never output JSON or Python dicts - always natural Arabic."},
+                {"role": "user", "content": f"User asked: {goal}\n\nResults from execution:\n{steps_summary}\n\nPlease provide a clear, natural Arabic response telling the user what happened. If it was successful, say so in a friendly way. Show key details."}
             ]
             response = await self.agent.openrouter.chat(model_id, messages, 0.3)
-            return response.content
-        except:
-            return "\n\n".join([str(r)[:500] for r in results])
+            if response.content and len(response.content.strip()) > 10:
+                return response.content
+        except Exception as e:
+            print(f"Synthesize error: {e}")
+        
+        # Fallback: format results nicely
+        if len(results) == 1:
+            r = results[0]
+            if isinstance(r, str) and r.startswith("{") and '"ok": true' in r.lower():
+                return f"تمت العملية بنجاح ✅"
+            return str(r)
+        return "\n\n".join([str(r)[:500] for r in results])
     
     async def _fallback_chat(self, goal: str) -> str:
         """Fallback to normal chat if planning fails"""
