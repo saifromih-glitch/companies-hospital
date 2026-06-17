@@ -138,6 +138,12 @@ class RomihAgent:
             _register_gmail(self.tools)
         except Exception:
             pass
+        # Plugin Marketplace
+        try:
+            from plugins.marketplace import register as _register_marketplace
+            _register_marketplace(self.tools)
+        except Exception:
+            pass
         # Cron Scheduler (reminders, recurring tasks)
         try:
             from tools.cron_tool import register as _register_cron

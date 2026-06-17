@@ -255,6 +255,13 @@ class OnboardingInterview:
     def _finalize(self) -> tuple[str, bool]:
         self.profile.biggest_pain = self._last_answer
         
+        # Auto-activate via Marketplace
+        try:
+            from plugins.marketplace import _market as mp
+            mp.auto_activate(self.profile.industry, str(self.profile.name or "anonymous"))
+        except:
+            pass
+        
         # Determine which plugins to enable
         plugins = []
         if "workshop" in self.profile.industry:
