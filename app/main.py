@@ -1,4 +1,5 @@
-"""مستشفى الشركات - FastAPI Application"""
+"""مستشفى الشركات - FastAPI Application v5.9"""
+# Build: 2026-06-17T18:51 — Dashboard Tools + File Delivery + Onboarding Name
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
