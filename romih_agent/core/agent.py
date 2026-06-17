@@ -322,11 +322,31 @@ class RomihAgent:
         # Direct tool execution: if goal matches a known tool, run it directly
         direct = self._try_direct_tool(goal)
         if direct:
-            return direct
+            # Try to make it natural Arabic via synthesize
+            try:
+                return await self._synthesize_direct(goal, direct)
+            except:
+                return direct
         
         if self.loop:
             return await self.loop.execute(goal)
         return await self.chat(goal)
+
+    async def _synthesize_direct(self, goal: str, raw_result: str) -> str:
+        """Convert raw tool result to natural Arabic"""
+        import json
+        try:
+            model_id, _ = await self.router.route(task_type="arabic")
+            messages = [
+                {"role": "system", "content": "You are a helpful Arabic assistant. Convert technical results into a natural, friendly Arabic response. Never output JSON or Python dicts - always natural Arabic."},
+                {"role": "user", "content": f"User asked: {goal}\n\nResult: {raw_result[:2000]}\n\nConvert this into a natural Arabic response."}
+            ]
+            response = await self.openrouter.chat(model_id, messages, 0.3)
+            if response.content and len(response.content.strip()) > 10:
+                return response.content
+        except:
+            pass
+        return raw_result
 
     def _try_direct_tool(self, goal: str) -> Optional[str]:
         """If goal text contains a known tool name, execute it directly"""
