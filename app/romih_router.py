@@ -90,6 +90,13 @@ async def debug_prompt():
     return {"system_prompt": agent.system_prompt[:2000]}
 
 
+@router.get("/dashboard/data")
+async def dashboard_data(user_id: str = "", industry: str = ""):
+    """Personalized dashboard — industry-specific cards and stats"""
+    from tools.dashboard_api import get_user_dashboard
+    return get_user_dashboard(user_id, industry)
+
+
 @router.get("/tools")
 async def list_tools():
     agent, _, _ = _get_agent()
