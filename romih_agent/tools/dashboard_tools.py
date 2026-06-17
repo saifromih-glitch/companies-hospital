@@ -9,7 +9,7 @@ from tools.custom_dashboard import (
 
 def register(tools_registry):
     """Register dashboard customization tools"""
-    from pi_tools.base import Tool
+    from tools.registry import Tool, RiskLevel
     
     def _add_dashboard_card(user_id: str = "", card: str = "", industry: str = "general") -> str:
         if not card:
@@ -48,7 +48,7 @@ def register(tools_registry):
         name="dash_add",
         description="أضف كارت للداشبورد (workshop_customers, hotel_bookings, umrah_pilgrims, mgmt_revenue...)",
         category="dashboard",
-        risk="low",
+        risk=RiskLevel.LOW,
         execute=_add_dashboard_card
     ))
     
@@ -56,7 +56,7 @@ def register(tools_registry):
         name="dash_remove",
         description="شيل كارت من الداشبورد",
         category="dashboard",
-        risk="low",
+        risk=RiskLevel.LOW,
         execute=_remove_dashboard_card
     ))
     
@@ -64,7 +64,7 @@ def register(tools_registry):
         name="dash_list",
         description="اعرض الكروت المتاحة للداشبورد",
         category="dashboard",
-        risk="low",
+        risk=RiskLevel.LOW,
         execute=_list_available_cards
     ))
     
@@ -72,7 +72,7 @@ def register(tools_registry):
         name="dash_reset",
         description="أرجع الداشبورد للوضع الافتراضي",
         category="dashboard",
-        risk="low",
+        risk=RiskLevel.LOW,
         execute=_reset_dashboard
     ))
     
