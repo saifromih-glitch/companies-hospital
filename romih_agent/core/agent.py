@@ -172,14 +172,15 @@ class RomihAgent:
         try:
             from tools.dashboard_tools import register as _register_dash
             _register_dash(self.tools)
-        except Exception:
-            pass
+        except Exception as e:
+            self._diag['dashboard_tools_err'] = str(e)
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
             from core.agent_loop import AgentLoop
             self.loop = AgentLoop(self)
         self.history: list[Message] = []
+        self._diag = {}  # diagnostic info
         self._init_system_prompt()
 
     def _init_system_prompt(self):

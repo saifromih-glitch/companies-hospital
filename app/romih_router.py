@@ -97,6 +97,16 @@ async def dashboard_data(user_id: str = "", industry: str = "", user_name: str =
     return get_user_dashboard(user_id, industry, user_name)
 
 
+@router.get("/diag")
+async def diag():
+    agent, _, _ = _get_agent()
+    return {
+        "tools": len(agent.tools.tools) if agent.tools else 0,
+        "diag": getattr(agent, "_diag", {}),
+        "syspath": [p for p in sys.path if "romih" in p.lower()][:3]
+    }
+
+
 @router.get("/tools")
 async def list_tools():
     agent, _, _ = _get_agent()
