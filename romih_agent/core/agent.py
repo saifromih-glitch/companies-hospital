@@ -126,6 +126,12 @@ class RomihAgent:
             _register_onboard(self.tools)
         except Exception:
             pass
+        # Gmail (email integration)
+        try:
+            from tools.gmail_tool import register as _register_gmail
+            _register_gmail(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
