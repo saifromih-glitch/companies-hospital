@@ -120,6 +120,12 @@ class RomihAgent:
             _register_hotels(self.tools)
         except Exception:
             pass
+        # Onboarding (interview + customization)
+        try:
+            from plugins.onboarding_tools import register as _register_onboard
+            _register_onboard(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
