@@ -144,6 +144,12 @@ class RomihAgent:
             _register_cron(self.tools)
         except Exception:
             pass
+        # Analytics & Compounding Knowledge
+        try:
+            from tools.analytics_tool import register as _register_analytics
+            _register_analytics(self.tools)
+        except Exception:
+            pass
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
