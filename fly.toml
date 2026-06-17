@@ -2,7 +2,6 @@ app = "doctor-companies"
 primary_region = "ams"
 
 [build]
-  builder = "nixpacks"
 
 [env]
   PYTHON_VERSION = "3.13"

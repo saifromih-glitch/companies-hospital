@@ -1,0 +1,12 @@
+romih_agent/
+__pycache__/
+*.pyc
+.git/
+.mypy_cache/
+.pytest_cache/
+*.db
+analytics_data/
+data/
+*.log
+node_modules/
+frontend/node_modules/
