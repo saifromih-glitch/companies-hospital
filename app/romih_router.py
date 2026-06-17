@@ -91,10 +91,10 @@ async def debug_prompt():
 
 
 @router.get("/dashboard/data")
-async def dashboard_data(user_id: str = "", industry: str = ""):
-    """Personalized dashboard — industry-specific cards and stats"""
+async def dashboard_data(user_id: str = "", industry: str = "", user_name: str = ""):
+    """Personalized dashboard — industry-specific cards and stats with name greeting"""
     from tools.dashboard_api import get_user_dashboard
-    return get_user_dashboard(user_id, industry)
+    return get_user_dashboard(user_id, industry, user_name)
 
 
 @router.get("/tools")

@@ -289,6 +289,12 @@ class MessageHandler:
 
         # تحديث اسم المستخدم
         self.agent.config.name = msg.get("first_name", username)
+        # Also update onboarding profile with user's name
+        if self.onboard:
+            try:
+                self.onboard.profile.name = msg.get("first_name", username)
+            except:
+                pass
 
         # Callback query
         if is_callback:

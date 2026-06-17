@@ -6,28 +6,33 @@ _AGENT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "romih_age
 sys.path.insert(0, _AGENT_DIR)
 
 
-def get_user_dashboard(user_id: str = "", industry: str = "") -> dict:
+def get_user_dashboard(user_id: str = "", industry: str = "", user_name: str = "") -> dict:
     """
     Return personalized dashboard data based on user's industry.
     Called from romih_router.py
     """
-    # Determine industry from user profile if not provided
-    if not industry:
+    # Determine name and industry from user profile
+    if not user_name or not industry:
         try:
             from plugins.onboarding import OnboardingInterview
             onboard = OnboardingInterview("onboarding_profile.json")
             if onboard.is_complete():
-                industry = ",".join(onboard.profile.industry) if onboard.profile.industry else "general"
-            else:
-                industry = "general"
+                if not user_name and onboard.profile.name:
+                    user_name = onboard.profile.name
+                if not industry and onboard.profile.industry:
+                    industry = ",".join(onboard.profile.industry)
         except:
-            industry = "general"
+            pass
+    
+    if not industry:
+        industry = "general"
     
     result = {
         "user_id": user_id,
+        "user_name": user_name or "",
         "industry": industry,
         "personalized": True,
-        "greeting": _greeting(industry),
+        "greeting": _greeting(industry, user_name),
         "cards": [],
         "quick_actions": [],
         "stats": {}
@@ -79,12 +84,13 @@ def get_user_dashboard(user_id: str = "", industry: str = "") -> dict:
     return result
 
 
-def _greeting(industry: str) -> str:
+def _greeting(industry: str, user_name: str = "") -> str:
+    name_part = f" {user_name}" if user_name else " بك"
     greetings = {
-        "workshop": "👋 أهلاً بك! هذه لوحة تحكم ورشتك",
-        "hotel": "👋 أهلاً بك! هذه لوحة تحكم فندقك",
-        "umrah": "👋 أهلاً بك! هذه لوحة تحكم شركة العمرة",
-        "general": "👋 أهلاً بك! هذه لوحة تحكم أعمالك",
+        "workshop": f"👋 أهلاً{name_part}! هذه لوحة تحكم ورشتك",
+        "hotel": f"👋 أهلاً{name_part}! هذه لوحة تحكم فندقك",
+        "umrah": f"👋 أهلاً{name_part}! هذه لوحة تحكم شركة العمرة",
+        "general": f"👋 أهلاً{name_part}! هذه لوحة تحكم أعمالك",
     }
     for key, msg in greetings.items():
         if key in industry:

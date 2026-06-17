@@ -121,16 +121,18 @@ class OnboardingInterview:
 اكتب /help للتعرف على الأوامر، أو /goal لبدء مهمة 🌸""", True
         
         if step == 1:
-            return self._q_industry()
+            return self._q_name()
         elif step == 2:
-            return self._q_details()
+            return self._q_industry()
         elif step == 3:
-            return self._q_size()
+            return self._q_details()
         elif step == 4:
-            return self._q_tools()
+            return self._q_size()
         elif step == 5:
-            return self._q_pain()
+            return self._q_tools()
         elif step == 6:
+            return self._q_pain()
+        elif step == 7:
             return self._finalize()
         
         # Step 0 - initial welcome already shown
@@ -149,6 +151,15 @@ class OnboardingInterview:
 
 مثال: 3 أو 2,3 أو شركة برمجة""", False
     
+    def _q_name(self) -> tuple[str, bool]:
+        """Ask user's name for personalized greeting"""
+        if self._last_answer and self.current_step == 1:
+            self.profile.name = self._last_answer
+        self._save_profile()
+        return """**ما اسمك يا غالي؟** 🌸
+
+عشان أحييك باسمك في الداشبورد وأقدر أخاطبك بشكل شخصي""", False
+
     def _q_industry(self) -> tuple[str, bool]:
         """Branch based on industry selection"""
         # Parse answer (numbers or text)
@@ -323,7 +334,7 @@ class OnboardingInterview:
     def _save_answer(self, step: int, answer: str):
         """Save answer to appropriate field"""
         if step == 1:  # name
-            self.profile.name = answer if answer != "نعم" and answer != "يلا" else ""
+            self.profile.name = answer.strip()
         # Other steps handled in their respective methods
     
     def reset(self):
