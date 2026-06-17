@@ -319,9 +319,34 @@ class RomihAgent:
 
     async def execute_goal(self, goal: str) -> str:
         """Execute a multi-step goal using the Agent Loop (Think-Act-Observe)"""
+        # Direct tool execution: if goal matches a known tool, run it directly
+        direct = self._try_direct_tool(goal)
+        if direct:
+            return direct
+        
         if self.loop:
             return await self.loop.execute(goal)
         return await self.chat(goal)
+
+    def _try_direct_tool(self, goal: str) -> Optional[str]:
+        """If goal text contains a known tool name, execute it directly"""
+        goal_lower = goal.lower().strip()
+        for tool_name in self.tools.tools:
+            if tool_name in goal_lower:
+                try:
+                    # Extract params from goal text
+                    # Pattern: tool_name key=value key2=value2
+                    params = {}
+                    parts = goal.split()
+                    for part in parts[1:]:
+                        if '=' in part:
+                            k, v = part.split('=', 1)
+                            params[k] = v
+                    result = self.tools.execute(tool_name, params, auto_approve=True)
+                    return str(result)
+                except Exception as e:
+                    return f"Tool execution error: {e}"
+        return None
 
     def clear_history(self):
         """مسح المحادثة الحالية"""

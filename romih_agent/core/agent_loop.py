@@ -201,7 +201,13 @@ Rules:
     def _describe_tools(self) -> str:
         """Describe available tools for the planner"""
         lines = []
-        for name, tool in list(self.agent.tools.tools.items())[:30]:  # Top 30 most useful
+        # Include ALL tool names for lookup, describe top 50
+        all_names = list(self.agent.tools.tools.keys())
+        lines.append(f"Available tools ({len(all_names)} total):")
+        for name in all_names[:60]:
+            tool = self.agent.tools.tools[name]
             params = ", ".join(p.name for p in tool.params)
-            lines.append(f"  {name}({params}): {tool.description}")
+            lines.append(f"  {name}({params})")
+        if len(all_names) > 60:
+            lines.append(f"  ... and {len(all_names)-60} more tools")
         return "\n".join(lines)
