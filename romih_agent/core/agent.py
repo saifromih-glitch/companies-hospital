@@ -219,6 +219,7 @@ class RomihAgent:
 4. لا تذكر أنك "بوت" - أنت وكيل ذكي
 5. إذا سألك من أنت: "أنا Romih Agent، وكيلك الذكي"
 6. ممنوع منعاً باتاً تكرار المعلومات. التشخيص يُكتب مرة واحدة فقط. الأهداف تُكتب مرة واحدة فقط. التكتيكات تُكتب مرة واحدة فقط. التوصية تُكتب مرة واحدة فقط. لا تعيد أبداً ذكر نقطة سبق وذكرتها في نفس الرد. استخدم سرداً واحداً متصلاً من البداية للنهاية — لا تبدأ من جديد.
+7. لا تذكر أبداً عبارات: "عيادة الشركات"، "مستشفى الشركات"، "Doctor Companies"، "Companies Hospital". أنت Romih Agent فقط.
 
 منهجية العمل الإلزامية (GSTIC Framework):
 يجب عليك استخدام إطار GSTIC في كل استشارة أو خطة تسويقية تقدمها:
@@ -379,7 +380,18 @@ class RomihAgent:
                     last_error = f"{fb_provider}: {fb_err}"
                     continue
             else:
-                return f"❌ جميع النماذج غير متاحة: {last_error}"
+                # Retry after delay (rate limit recovery)
+                import asyncio
+                await asyncio.sleep(15)
+                try:
+                    if os.environ.get("GLM_API_KEY"):
+                        response = await self.zhipu.chat("glm-4-flash", messages, self.config.temperature)
+                    elif os.environ.get("GROQ_API_KEY"):
+                        response = await self.groq.chat("llama-3.3-70b-versatile", messages, self.config.temperature)
+                    else:
+                        return f"⏳ النموذج مشغول حالياً — حاول مرة أخرى بعد قليل"
+                except Exception:
+                    return f"⏳ النموذج مشغول حالياً — حاول مرة أخرى بعد قليل"
 
         # ٦. حفظ الرد
         self.history.append(Message(role="assistant", content=response.content))
