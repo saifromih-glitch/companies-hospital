@@ -267,6 +267,30 @@ class MessageHandler:
         except Exception as e:
             print(f"Onboarding not loaded: {e}")
 
+
+    def _deduplicate_response(self, text: str) -> str:
+        """Remove repeated sections from LLM response"""
+        import re
+        # Split into paragraphs
+        paras = re.split(r'
+
++', text.strip())
+        if len(paras) <= 3:
+            return text
+        
+        seen = set()
+        unique = []
+        for p in paras:
+            # Normalize: remove numbers, punctuation, collapse whitespace for comparison
+            norm = re.sub(r'[\d٠-٩\s،؛:\.\,\-\(\)\[\]\/*]', '', p.strip())[:80]
+            if norm not in seen or len(norm) < 10:
+                seen.add(norm)
+                unique.append(p)
+        
+        return '
+
+'.join(unique)
+
     async def _smart_reply(self, bot, chat_id, response):
         """Send response - if it contains file content, send as document"""
         # Clean raw JSON tool calls from response text
@@ -275,6 +299,9 @@ class MessageHandler:
             # Remove raw JSON tool call blocks
             response = re.sub(r'\{\s*"tool"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:\s*\{[^}]*\}\s*\}', '', response)
             response = re.sub(r'\n{3,}', '\n\n', response).strip()
+        # Deduplicate repeated sections
+        if isinstance(response, str):
+            response = self._deduplicate_response(response)
         # File delivery: <<<FILE_CSV>>>
         if isinstance(response, str) and response.startswith("<<<FILE_CSV>>>"):
             try:
