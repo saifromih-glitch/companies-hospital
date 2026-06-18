@@ -12,6 +12,3 @@ structlog>=24.0
 python-multipart>=0.0.9
 bcrypt>=4.1
 
-fpdf2>=2.7
-openpyxl>=3.1
-matplotlib>=3.7
