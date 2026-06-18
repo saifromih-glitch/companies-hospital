@@ -173,17 +173,34 @@ async def serve_dashboard():
     return HTMLResponse(content=html, media_type="text/html; charset=utf-8")
 
 
+
+@router.get("/debug/traceback")
+async def debug_traceback():
+    """Return the last error traceback for debugging"""
+    try:
+        _, bot, handler = _get_agent()
+        # Force agent init to catch any errors
+        await handler.agent.chat("test")
+        return {"status": "ok", "agent": str(type(handler.agent))}
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
 # ═══ Telegram Webhook ═══
 
 @router.post("/webhook")
 async def telegram_webhook(req: Request):
     _, bot, handler = _get_agent()
+    import traceback
     try:
         update = await req.json()
         msg = bot.parse_message(update)
         if msg and bot.token:
             await handler.handle(msg, bot)
+        else:
+            print(f"[WEBHOOK] msg={bool(msg)} token={bool(bot.token)}")
     except Exception as e:
+        traceback.print_exc()
         print(f"Webhook error: {e}")
     return {"ok": True}
 
