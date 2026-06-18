@@ -69,6 +69,25 @@ tr:hover{background:#F9FAFB}
 .tab-bar button:first-child{border-radius:0 8px 8px 0}
 .tab-bar button:last-child{border-radius:8px 0 0 8px}
 @media(max-width:500px){.header h1{font-size:15px}.header nav a{font-size:11px;margin-right:8px}}
+@media(max-width:640px){
+  .main{padding:0 10px;margin:12px auto}
+  .header{padding:10px 12px;flex-wrap:wrap}
+  .header nav{margin-top:4px;width:100%}
+  .card{padding:16px;border-radius:10px;margin-bottom:12px}
+  .card h2{font-size:17px}
+  .btn{padding:12px 16px;font-size:13px;width:100%}
+  .btn-google{font-size:12px}
+  table{font-size:11px}
+  th,td{padding:8px 6px}
+  .tab-bar button{font-size:12px;padding:8px}
+  .stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat{padding:12px 8px}
+  .stat .v{font-size:20px}
+  input,select,textarea{font-size:16px;padding:10px 12px}
+  #cases-table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .severity{font-size:10px;padding:2px 6px}
+  .status{font-size:10px;padding:2px 6px}
+}
 </style>"""
 
 
@@ -110,7 +129,7 @@ async def unified_app():
         # DASHBOARD VIEW
         '<div id="view-dashboard" class="hidden"><div class="main"><h2 style="margin-bottom:16px;color:#0A1E3C">' + welcome + '</h2><div class="stats"><div class="stat"><div class="v" id="st-company">-</div><div class="l">' + ae("الشركة") + '</div></div><div class="stat"><div class="v" id="st-cases">-</div><div class="l">' + ae("الحالات") + '</div></div><div class="stat"><div class="v">22</div><div class="l">' + ae("خبير AI") + '</div></div><div class="stat"><div class="v" id="st-diagnosed">-</div><div class="l">' + ae("تم تشخيصها") + '</div></div></div><div class="card"><h2>&#129657; ' + ae("استقبال حالة جديدة") + '</h2><p>' + ae("صف مشكلة شركتك وسيقوم الذكاء الاصطناعي بتشخيصها فوراً") + '</p><div class="error" id="case-error"></div><form onsubmit="doTriage(event)"><div class="form-group"><label>' + ae("عنوان المشكلة") + '</label><input type="text" id="ct" required></div><div class="form-group"><label>' + ae("وصف تفصيلي") + '</label><textarea id="cd" required></textarea></div><div class="form-group"><label>' + ae("المجال") + '</label><select id="cc" required><option value="">' + ae("اختر المجال") + '</option><option value="finance">' + ae("مالية") + '</option><option value="marketing">' + ae("تسويق ومبيعات") + '</option><option value="operations">' + ae("عمليات") + '</option><option value="hr">' + ae("موارد بشرية") + '</option><option value="strategy">' + ae("استراتيجية") + '</option><option value="legal">' + ae("قانوني") + '</option><option value="technical">' + ae("تقني") + '</option></select></div><button type="submit" class="btn btn-gold">' + ae("ابدأ التشخيص") + '</button></form><div class="loading" id="triage-loading"><div class="spinner"></div><p style="font-size:12px;color:#6B7280">' + ae("جاري التحليل...") + '</p></div><div id="triage-result" class="hidden"></div></div></div></div>' +
         # CASES VIEW
-        '<div id="view-cases" class="hidden"><div class="main"><div class="card"><h2>&#128203; ' + ae("الحالات") + '</h2><div class="loading" id="cases-loading">' + ae("جاري التحميل...") + '</div><div id="cases-empty" class="hidden" style="text-align:center;padding:32px;color:#9CA3AF"><p style="font-size:32px;margin-bottom:8px">&#128236;</p><p>' + ae("لا توجد حالات بعد") + '</p></div><table id="cases-table" class="hidden"><thead><tr><th>' + ae("الحالة") + '</th><th>' + ae("المجال") + '</th><th>' + ae("الخطورة") + '</th><th>' + ae("الحالة") + '</th><th>' + ae("التاريخ") + '</th></tr></thead><tbody id="cases-body"></tbody></table></div></div></div>' +
+        '<div id="view-cases" class="hidden"><div class="main"><div class="card"><h2>&#128203; ' + ae("الحالات") + '</h2><div class="loading" id="cases-loading">' + ae("جاري التحميل...") + '</div><div id="cases-empty" class="hidden" style="text-align:center;padding:32px;color:#9CA3AF"><p style="font-size:32px;margin-bottom:8px">&#128236;</p><p>' + ae("لا توجد حالات بعد") + '</p></div><div id="cases-table-wrapper" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="cases-table" class="hidden"><thead><tr><th>' + ae("الحالة") + '</th><th>' + ae("المجال") + '</th><th>' + ae("الخطورة") + '</th><th>' + ae("الحالة") + '</th><th>' + ae("التاريخ") + '</th></tr></thead><tbody id="cases-body"></tbody></table></div></div></div></div>' +
         '</div><script>var A="https://companies-hospital-production.up.railway.app";' +
         'function T(){var m=document.cookie.match(/ch_token=([^;]+)/);return m?m[1]:localStorage.getItem("token")}' +
         'function E(id,m){var e=document.getElementById(id);e.textContent=m;e.classList.add("show");setTimeout(function(){e.classList.remove("show")},5e3)}' +
@@ -149,7 +168,7 @@ async def demo():
         '</a><a href="#" onclick="showTab(\'cases\')" data-tab="cases">' + ae("الحالات") +
         '</a></nav><span class="user-info">' + ae("وضع تجريبي") + '</span></div>' +
         '<div id="view-dashboard"><div class="main"><h2 style="margin-bottom:16px;color:#0A1E3C">' + welcome + '</h2><div class="stats"><div class="stat"><div class="v">1</div><div class="l">' + ae("الشركة") + '</div></div><div class="stat"><div class="v" id="st-cases">-</div><div class="l">' + ae("الحالات") + '</div></div><div class="stat"><div class="v">22</div><div class="l">' + ae("خبير AI") + '</div></div><div class="stat"><div class="v" id="st-diagnosed">-</div><div class="l">' + ae("تم تشخيصها") + '</div></div></div><div class="card"><h2>&#129657; ' + ae("استقبال حالة جديدة") + '</h2><p>' + ae("صف مشكلة شركتك وسيقوم الذكاء الاصطناعي بتشخيصها فوراً") + '</p><div class="error" id="case-error"></div><form onsubmit="doTriage(event)"><div class="form-group"><label>' + ae("عنوان المشكلة") + '</label><input type="text" id="ct" required></div><div class="form-group"><label>' + ae("وصف تفصيلي") + '</label><textarea id="cd" required></textarea></div><div class="form-group"><label>' + ae("المجال") + '</label><select id="cc" required><option value="">' + ae("اختر المجال") + '</option><option value="finance">' + ae("مالية") + '</option><option value="marketing">' + ae("تسويق ومبيعات") + '</option><option value="operations">' + ae("عمليات") + '</option><option value="hr">' + ae("موارد بشرية") + '</option><option value="strategy">' + ae("استراتيجية") + '</option><option value="legal">' + ae("قانوني") + '</option><option value="technical">' + ae("تقني") + '</option></select></div><button type="submit" class="btn btn-gold">' + ae("ابدأ التشخيص") + '</button></form><div class="loading" id="triage-loading"><div class="spinner"></div><p style="font-size:12px;color:#6B7280">' + ae("جاري التحليل...") + '</p></div><div id="triage-result" class="hidden"></div></div></div></div>' +
-        '<div id="view-cases" class="hidden"><div class="main"><div class="card"><h2>&#128203; ' + ae("الحالات") + '</h2><div class="loading" id="cases-loading">' + ae("جاري التحميل...") + '</div><div id="cases-empty" class="hidden" style="text-align:center;padding:32px;color:#9CA3AF"><p style="font-size:32px;margin-bottom:8px">&#128236;</p><p>' + ae("لا توجد حالات بعد") + '</p></div><table id="cases-table" class="hidden"><thead><tr><th>' + ae("الحالة") + '</th><th>' + ae("المجال") + '</th><th>' + ae("الخطورة") + '</th><th>' + ae("الحالة") + '</th><th>' + ae("التاريخ") + '</th></tr></thead><tbody id="cases-body"></tbody></table></div></div></div>' +
+        '<div id="view-cases" class="hidden"><div class="main"><div class="card"><h2>&#128203; ' + ae("الحالات") + '</h2><div class="loading" id="cases-loading">' + ae("جاري التحميل...") + '</div><div id="cases-empty" class="hidden" style="text-align:center;padding:32px;color:#9CA3AF"><p style="font-size:32px;margin-bottom:8px">&#128236;</p><p>' + ae("لا توجد حالات بعد") + '</p></div><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="cases-table" class="hidden"><thead><tr><th>' + ae("الحالة") + '</th><th>' + ae("المجال") + '</th><th>' + ae("الخطورة") + '</th><th>' + ae("الحالة") + '</th><th>' + ae("التاريخ") + '</th></tr></thead><tbody id="cases-body"></tbody></table></div></div></div></div>' +
         '</div><script>var A="https://companies-hospital-production.up.railway.app";var DT="demo";' +
         'function E(id,m){var e=document.getElementById(id);e.textContent=m;e.classList.add("show");setTimeout(function(){e.classList.remove("show")},5e3)}' +
         'function $(id){return document.getElementById(id)}' +
