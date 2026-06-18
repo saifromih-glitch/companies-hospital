@@ -374,11 +374,50 @@ class MessageHandler:
         cmd, arg = TelegramBot.extract_command(text)
 
         if cmd == "/start":
-            if self.onboard:
-                welcome = self.onboard.get_welcome()
+            # Personalized welcome with memory
+            try:
+                from .user_memory import memory
+                facts = memory.recall(chat_id)
+            except:
+                facts = {}
+            
+            name = msg.get("first_name", username)
+            if facts.get("industry"):
+                welcome = f"أهلاً {name}! 🌸
+
+آخر مرة كنت بتخطط لـ {facts.get('industry', 'عملك')}."
+                if facts.get("last_goal"):
+                    welcome += f"
+هدفك كان: {facts['last_goal'][:100]}.
+
+عاوز تكمل ولا حاجة جديدة؟"
+                else:
+                    welcome += "
+
+كيف أقدر أساعدك اليوم؟"
             else:
-                welcome = self.START_MSG
-            await bot.send_message(chat_id, welcome)
+                welcome = f"أهلاً {name}! 🌸
+
+أنا Romih Agent — وكيلك الذكي. أساعدك في:
+🛠️ إدارة الورش
+📊 خطط تسويقية
+💰 تحليل مالي
+🔄 تحول رقمي
+🏨 إدارة فنادق
+🕋 خدمات العمرة
+
+كيف أقدر أخدمك؟"
+            
+            # Send with action buttons
+            keyboard = {
+                "inline_keyboard": [
+                    [{"text": "📊 خطة تسويقية", "callback_data": "ask:أريد خطة تسويقية لعملي"}],
+                    [{"text": "💰 تحليل تكاليف", "callback_data": "ask:حلل تكاليف عملي"},
+                     {"text": "🔄 تحول رقمي", "callback_data": "ask:أريد خطة تحول رقمي"}],
+                    [{"text": "📋 وصف مشكلتي", "callback_data": "ask_free"}]
+                ]
+            }
+            await bot.send_buttons(chat_id, welcome, keyboard)
             return True
 
         if cmd == "/help":
@@ -518,6 +557,17 @@ class MessageHandler:
         data = msg["text"]
         chat_id = msg["chat_id"]
         cb_id = msg.get("callback_id", "")
+
+        if data.startswith("ask:"):
+            query = data.split(":", 1)[1]
+            if query == "ask_free":
+                await bot.send_message(chat_id, "اكتب مشكلتك أو استفسارك بالتفصيل — وأنا معاك 🌸")
+            else:
+                await bot.answer_callback(cb_id)
+                await bot.send_chat_action(chat_id)
+                response = await self.agent.chat(query)
+                await self._smart_reply(bot, chat_id, response)
+            return True
 
         if data.startswith("expert:"):
             expert_key = data.split(":", 1)[1]
