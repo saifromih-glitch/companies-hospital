@@ -383,30 +383,24 @@ class MessageHandler:
             
             name = msg.get("first_name", username)
             if facts.get("industry"):
-                welcome = f"أهلاً {name}! 🌸
-
-آخر مرة كنت بتخطط لـ {facts.get('industry', 'عملك')}."
+                NL = "\n"
+                welcome = f"أهلاً {name}! 🌸" + NL*2 + f"آخر مرة كنت بتخطط لـ {facts.get('industry', 'عملك')}."
                 if facts.get("last_goal"):
-                    welcome += f"
-هدفك كان: {facts['last_goal'][:100]}.
-
-عاوز تكمل ولا حاجة جديدة؟"
+                    goal = facts['last_goal'][:100]
+                    welcome += NL + f"هدفك كان: {goal}." + NL*2 + "عاوز تكمل ولا حاجة جديدة؟"
                 else:
-                    welcome += "
-
-كيف أقدر أساعدك اليوم؟"
+                    welcome += NL*2 + "كيف أقدر أساعدك اليوم؟"
             else:
-                welcome = f"أهلاً {name}! 🌸
-
-أنا Romih Agent — وكيلك الذكي. أساعدك في:
-🛠️ إدارة الورش
-📊 خطط تسويقية
-💰 تحليل مالي
-🔄 تحول رقمي
-🏨 إدارة فنادق
-🕋 خدمات العمرة
-
-كيف أقدر أخدمك؟"
+                NL = "\n"
+                welcome = f"أهلاً {name}! 🌸" + NL*2
+                welcome += "أنا Romih Agent — وكيلك الذكي. أساعدك في:" + NL
+                welcome += "🛠️ إدارة الورش" + NL
+                welcome += "📊 خطط تسويقية" + NL
+                welcome += "💰 تحليل مالي" + NL
+                welcome += "🔄 تحول رقمي" + NL
+                welcome += "🏨 إدارة فنادق" + NL
+                welcome += "🕋 خدمات العمرة" + NL*2
+                welcome += "كيف أقدر أخدمك؟"
             
             # Send with action buttons
             keyboard = {
