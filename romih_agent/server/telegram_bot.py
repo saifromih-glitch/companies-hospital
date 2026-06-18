@@ -269,6 +269,12 @@ class MessageHandler:
 
     async def _smart_reply(self, bot, chat_id, response):
         """Send response - if it contains file content, send as document"""
+        # Clean raw JSON tool calls from response text
+        if isinstance(response, str):
+            import re
+            # Remove raw JSON tool call blocks
+            response = re.sub(r'\{\s*"tool"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:\s*\{[^}]*\}\s*\}', '', response)
+            response = re.sub(r'\n{3,}', '\n\n', response).strip()
         # File delivery: <<<FILE_CSV>>>
         if isinstance(response, str) and response.startswith("<<<FILE_CSV>>>"):
             try:
