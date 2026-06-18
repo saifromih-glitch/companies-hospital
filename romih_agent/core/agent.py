@@ -177,6 +177,12 @@ class RomihAgent:
             _register_dash(self.tools)
         except Exception as e:
             self._diag['dashboard_tools_err'] = str(e)
+        # Power Tools (PDF, Excel, Charts, Web Search, YouTube)
+        try:
+            from tools.power_tools import register as _register_power
+            _register_power(self.tools)
+        except Exception as e:
+            self._diag['power_tools_err'] = str(e)
         # Agent Loop (think-act-observe)
         self.loop = None
         if create_swarm:
