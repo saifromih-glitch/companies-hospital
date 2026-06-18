@@ -70,23 +70,32 @@ tr:hover{background:#F9FAFB}
 .tab-bar button:last-child{border-radius:8px 0 0 8px}
 @media(max-width:500px){.header h1{font-size:15px}.header nav a{font-size:11px;margin-right:8px}}
 @media(max-width:640px){
-  .main{padding:0 10px;margin:12px auto}
-  .header{padding:10px 12px;flex-wrap:wrap}
-  .header nav{margin-top:4px;width:100%}
-  .card{padding:16px;border-radius:10px;margin-bottom:12px}
-  .card h2{font-size:17px}
-  .btn{padding:12px 16px;font-size:13px;width:100%}
+  .main{padding:0 8px;margin:8px auto;width:100%}
+  .header{padding:8px 10px;flex-wrap:wrap;gap:4px}
+  .header h1{font-size:15px}
+  .header nav{margin-top:4px;width:100%;display:flex;flex-wrap:wrap;gap:4px}
+  .header nav a{font-size:11px;padding:4px 8px;margin-right:0}
+  .card{padding:14px;border-radius:10px;margin-bottom:10px;width:100%}
+  .card h2{font-size:16px;margin-bottom:6px}
+  .card p{font-size:12px;margin-bottom:10px}
+  .btn{padding:12px 14px;font-size:14px;width:100%}
   .btn-google{font-size:12px}
-  table{font-size:11px}
-  th,td{padding:8px 6px}
-  .tab-bar button{font-size:12px;padding:8px}
-  .stats{grid-template-columns:repeat(2,1fr);gap:8px}
-  .stat{padding:12px 8px}
-  .stat .v{font-size:20px}
-  input,select,textarea{font-size:16px;padding:10px 12px}
+  table{font-size:10px}
+  th,td{padding:6px 4px}
+  .tab-bar button{font-size:11px;padding:8px 6px}
+  .stats{grid-template-columns:repeat(2,1fr);gap:6px}
+  .stat{padding:10px 6px}
+  .stat .v{font-size:18px}
+  .stat .l{font-size:10px}
+  input,select,textarea{font-size:16px;padding:10px 10px;width:100%;max-width:100%}
+  textarea{min-height:80px}
   #cases-table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .severity{font-size:10px;padding:2px 6px}
-  .status{font-size:10px;padding:2px 6px}
+  .severity{font-size:9px;padding:2px 4px}
+  .status{font-size:9px;padding:2px 4px}
+  .tag,.expert-tag{font-size:10px;padding:2px 6px}
+  .user-info{font-size:10px}
+  .error,.success{padding:8px;font-size:11px}
+  .loading p{font-size:11px}
 }
 </style>"""
 
