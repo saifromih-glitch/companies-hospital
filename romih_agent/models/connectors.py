@@ -133,6 +133,45 @@ class OpenRouterConnector:
                             yield content
 
 
+class ZhipuConnector:
+    """موصل Zhipu GLM - نماذج GLM-4-flash المجانية"""
+
+    def __init__(self, api_key: str = ""):
+        self.api_key = api_key or os.environ.get("GLM_API_KEY", "")
+        self.base_url = "https://open.bigmodel.cn/api/paas/v4"
+
+    async def chat(self, model: str, messages: list[dict],
+                   temperature: float = 0.7) -> ModelResponse:
+        """محادثة مع GLM-4-flash (مجاني، سريع، عربي ممتاز)"""
+        if not self.api_key:
+            raise ValueError("GLM_API_KEY غير موجود")
+
+        async with httpx.AsyncClient(timeout=60) as client:
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": model or "glm-4-flash",
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": 4096
+            }
+            resp = await client.post(
+                f"{self.base_url}/chat/completions",
+                json=payload, headers=headers
+            )
+            data = resp.json()
+            if "choices" not in data:
+                raise RuntimeError(f"Zhipu error: {data}")
+            return ModelResponse(
+                content=data["choices"][0]["message"]["content"],
+                model=data.get("model", model),
+                tokens=data.get("usage", {}).get("total_tokens", 0),
+                provider="zhipu"
+            )
+
+
 class AutoRouter:
     """موجه ذكي - يختار النموذج المناسب تلقائياً"""
 
@@ -209,7 +248,11 @@ class AutoRouter:
         return self.route_cloud(task_type, need_speed)
 
     def route_cloud(self, task_type: str, need_speed: bool = False) -> tuple[str, str]:
-        """اختيار نموذج سحابي"""
+        """اختيار نموذج سحابي — Zhipu GLM-4-flash أولاً (مجاني)، OpenRouter احتياط"""
+        # Zhipu GLM-4-flash is free, fast, excellent Arabic
+        if os.environ.get("GLM_API_KEY"):
+            return "glm-4-flash", "zhipu"
+        # Fallback to OpenRouter free models
         if need_speed:
             return self.FAST_MODELS["cloud"][0], "openrouter"
         if task_type == "code":
@@ -225,4 +268,5 @@ class AutoRouter:
 # Connectors جاهزون
 ollama = OllamaConnector()
 openrouter = OpenRouterConnector()
+zhipu = ZhipuConnector()
 router = AutoRouter(ollama)

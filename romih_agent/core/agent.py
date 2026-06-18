@@ -11,8 +11,8 @@ from dataclasses import dataclass, field
 
 from safety.shield import SafetyShield, SecretsVault
 from models.connectors import (
-    OllamaConnector, OpenRouterConnector, AutoRouter,
-    ModelResponse, ollama, openrouter, router
+    OllamaConnector, OpenRouterConnector, ZhipuConnector, AutoRouter,
+    ModelResponse, ollama, openrouter, zhipu, router
 )
 from memory.memory_system import MemorySystem
 from agents.swarm import AgentSwarm
@@ -55,6 +55,7 @@ class RomihAgent:
         self.vault = SecretsVault()
         self.ollama = ollama
         self.openrouter = openrouter
+        self.zhipu = zhipu
         self.router = router
         self.is_orchestrator = create_swarm
         # Sub-agents: ذاكرة خفيفة بدون Swarm
@@ -321,6 +322,10 @@ class RomihAgent:
         try:
             if provider == "ollama":
                 response = await self.ollama.chat(
+                    model_id, messages, self.config.temperature
+                )
+            elif provider == "zhipu":
+                response = await self.zhipu.chat(
                     model_id, messages, self.config.temperature
                 )
             else:
