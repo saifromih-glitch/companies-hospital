@@ -70,7 +70,29 @@ class TelegramBot:
             import json
             text = json.dumps(text, ensure_ascii=False, indent=2)
         if len(text) > 4000:
-            text = text[:4000] + "\n\n_(truncated...)_"
+            # Split into multiple messages instead of truncating
+            parts = []
+            remaining = text
+            while len(remaining) > 4000:
+                # Find a good split point (end of paragraph)
+                split_at = remaining.rfind('\n\n', 0, 4000)
+                if split_at == -1 or split_at < 2000:
+                    split_at = remaining.rfind('. ', 0, 4000)
+                if split_at == -1 or split_at < 2000:
+                    split_at = remaining.rfind(' ', 0, 4000)
+                if split_at == -1 or split_at < 1000:
+                    split_at = 4000
+                parts.append(remaining[:split_at].strip())
+                remaining = remaining[split_at:].strip()
+            parts.append(remaining)
+            # Send first part as the main text, queue rest
+            text = parts[0]
+            if len(parts) > 1:
+                for extra in parts[1:]:
+                    try:
+                        await self._send_text(chat_id, extra)
+                    except:
+                        pass
 
         # Detect SVG code blocks
         import re
