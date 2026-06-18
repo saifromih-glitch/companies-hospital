@@ -191,6 +191,7 @@ class RomihAgent:
             from core.agent_loop import AgentLoop
             self.loop = AgentLoop(self)
         self.history: list[Message] = []
+        self._user_context = ""  # per-user memory injection
         self._init_system_prompt()
 
     def _init_system_prompt(self):
