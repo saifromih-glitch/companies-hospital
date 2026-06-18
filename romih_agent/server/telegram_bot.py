@@ -360,6 +360,16 @@ class MessageHandler:
         if is_callback:
             return await self._handle_callback(msg, bot)
 
+        # Load user memory for personalized responses
+        user_context = ""
+        try:
+            from .user_memory import memory
+            user_context = memory.recall_context(chat_id)
+            if user_context:
+                self.agent.add_context(user_context)
+        except Exception:
+            pass
+
         # أمر
         cmd, arg = TelegramBot.extract_command(text)
 
@@ -477,14 +487,26 @@ class MessageHandler:
         if cmd == "/ask" and arg:
             await bot.send_chat_action(chat_id)
             response = await self.agent.chat(arg)
-            await bot.send_message(chat_id, response)
+            await self._smart_reply(bot, chat_id, response)
+            # Save to memory
+            try:
+                from .user_memory import memory
+                memory.extract_and_remember(chat_id, arg, str(response)[:200])
+            except Exception:
+                pass
             return True
 
         # رسالة عادية - دردشة
         if not cmd:
             await bot.send_chat_action(chat_id)
             response = await self.agent.chat(text)
-            await bot.send_message(chat_id, response)
+            await self._smart_reply(bot, chat_id, response)
+            # Save to memory
+            try:
+                from .user_memory import memory
+                memory.extract_and_remember(chat_id, text, str(response)[:200])
+            except Exception:
+                pass
             return True
 
         # أمر غير معروف

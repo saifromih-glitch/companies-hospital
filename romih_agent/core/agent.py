@@ -300,6 +300,10 @@ class RomihAgent:
         except:
             return ""
 
+    def add_context(self, context: str):
+        """Inject per-user memory into next system prompt"""
+        self._user_context = context
+
     async def chat(self, message: str,
                    task_type: str = "chat") -> str:
         """
@@ -325,7 +329,7 @@ class RomihAgent:
         )
 
         # ٤. بناء الرسائل
-        messages = [{"role": "system", "content": self.system_prompt}]
+        messages = [{"role": "system", "content": self.system_prompt + self._user_context}]
         for msg in self.history[-self.config.max_history:]:
             messages.append({"role": msg.role, "content": msg.content})
 
@@ -430,7 +434,7 @@ class RomihAgent:
         )
 
         # ٤. بناء الرسائل
-        messages = [{"role": "system", "content": self.system_prompt}]
+        messages = [{"role": "system", "content": self.system_prompt + self._user_context}]
         for msg in self.history[-self.config.max_history:]:
             messages.append({"role": msg.role, "content": msg.content})
 
@@ -524,6 +528,7 @@ class RomihAgent:
     def clear_history(self):
         """مسح المحادثة الحالية"""
         self.history = []
+        self._user_context = ""  # per-user memory injection
 
     def get_status(self) -> dict:
         """حالة الوكيل الحالية"""
