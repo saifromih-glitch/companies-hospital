@@ -71,10 +71,17 @@ async def status():
 
 @router.post("/chat")
 async def chat(req: ChatRequest):
-    agent, _, _ = _get_agent()
-    agent.config.prefer_local = req.prefer_local
-    response = await agent.chat(req.message, req.task_type)
-    return {"response": response, "status": agent.get_status()}
+    import traceback
+    try:
+        agent, _, _ = _get_agent()
+        agent.config.prefer_local = req.prefer_local
+        response = await agent.chat(req.message, req.task_type)
+        return {"response": response, "status": agent.get_status()}
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e), "traceback": traceback.format_exc()},
+            status_code=500
+        )
 
 
 @router.post("/goal")
