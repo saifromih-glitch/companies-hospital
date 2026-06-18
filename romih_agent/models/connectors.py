@@ -139,22 +139,22 @@ class AutoRouter:
     # الأولويات حسب نوع المهمة
     CODE_MODELS = {
         "local": ["qwen2.5-coder:7b", "gemma4:12b"],
-        "cloud": ["anthropic/claude-sonnet-4.6", "google/gemini-2.5-flash"]
+        "cloud": ["google/gemini-2.5-flash:free", "moonshotai/kimi-k2-0905:free"]
     }
 
     ARABIC_MODELS = {
         "local": ["gemma4:12b"],
-        "cloud": ["google/gemini-2.5-flash", "google/gemini-2.5-pro"]
+        "cloud": ["google/gemini-2.5-flash:free", "google/gemini-2.5-flash"]
     }
 
     REASONING_MODELS = {
         "local": ["gemma4:12b"],
-        "cloud": ["anthropic/claude-opus-4.8", "anthropic/claude-sonnet-4.6"]
+        "cloud": ["google/gemini-2.5-flash:free", "google/gemini-2.5-pro:free"]
     }
 
     FAST_MODELS = {
         "local": ["qwen3.5:4b"],
-        "cloud": ["google/gemini-2.5-flash-lite", "openrouter/auto"]
+        "cloud": ["google/gemini-2.5-flash-lite:free", "google/gemini-2.5-flash:free"]
     }
 
     def __init__(self, ollama: OllamaConnector):
