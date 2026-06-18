@@ -271,26 +271,18 @@ class MessageHandler:
     def _deduplicate_response(self, text: str) -> str:
         """Remove repeated sections from LLM response"""
         import re
-        # Split into paragraphs
-        paras = re.split(r'
-
-+', text.strip())
+        paras = text.strip().split("\n\n")
         if len(paras) <= 3:
             return text
-        
         seen = set()
         unique = []
         for p in paras:
-            # Normalize: remove numbers, punctuation, collapse whitespace for comparison
-            norm = re.sub(r'[\d٠-٩\s،؛:\.\,\-\(\)\[\]\/*]', '', p.strip())[:80]
-            if norm not in seen or len(norm) < 10:
-                seen.add(norm)
+            norm = re.sub(r"[^A-Za-z\u0621-\u064a]", "", p.strip())[:80]
+            if not norm or norm not in seen or len(norm) < 10:
+                if norm:
+                    seen.add(norm)
                 unique.append(p)
-        
-        return '
-
-'.join(unique)
-
+        return "\n\n".join(unique)
     async def _smart_reply(self, bot, chat_id, response):
         """Send response - if it contains file content, send as document"""
         # Clean raw JSON tool calls from response text
