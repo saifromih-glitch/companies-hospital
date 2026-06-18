@@ -1,5 +1,5 @@
 """
-Romih Agent — Telegram Bot
+Romih Agent - Telegram Bot
 ===========================
 Webhook-based Telegram integration
 """
@@ -48,6 +48,7 @@ class TelegramBot:
         """تعيين قائمة الأوامر"""
         commands = [
             {"command": "start", "description": "ابدأ المحادثة"},
+            {"command": "goal", "description": "نفذ مهمة متعددة الخطوات"},
             {"command": "ask", "description": "اسأل Romih سؤال"},
             {"command": "build", "description": "اطلب من Romih بناء شيء"},
             {"command": "expert", "description": "استشر خبيراً"},
@@ -61,21 +62,85 @@ class TelegramBot:
             await c.post(f"{self.base}/setMyCommands", json={"commands": commands})
 
     async def send_message(self, chat_id: int, text: str,
-                           parse_mode: str = "Markdown",
+                           parse_mode: str = None,
                            reply_to: int = None) -> dict:
-        """إرسال رسالة"""
+        """Send a message. Detects SVG and sends as file if present."""
+        # Safety: ensure text is a string
+        if not isinstance(text, str):
+            import json
+            text = json.dumps(text, ensure_ascii=False, indent=2)
         if len(text) > 4000:
-            text = text[:4000] + "\n\n_(مقطوع...)_"
+            # Split into multiple messages instead of truncating
+            parts = []
+            remaining = text
+            while len(remaining) > 4000:
+                # Find a good split point (end of paragraph)
+                split_at = remaining.rfind('\n\n', 0, 4000)
+                if split_at == -1 or split_at < 2000:
+                    split_at = remaining.rfind('. ', 0, 4000)
+                if split_at == -1 or split_at < 2000:
+                    split_at = remaining.rfind(' ', 0, 4000)
+                if split_at == -1 or split_at < 1000:
+                    split_at = 4000
+                parts.append(remaining[:split_at].strip())
+                remaining = remaining[split_at:].strip()
+            parts.append(remaining)
+            # Send first part as the main text, queue rest
+            text = parts[0]
+            if len(parts) > 1:
+                for extra in parts[1:]:
+                    try:
+                        await self._send_text(chat_id, extra)
+                    except:
+                        pass
+
+        # Detect SVG code blocks
+        import re
+        svg_match = re.search(r'```svg\s*\n(.*?)```', text, re.DOTALL)
+        if svg_match:
+            svg_code = svg_match.group(1).strip()
+            clean_text = re.sub(r'```svg\s*\n.*?```', '', text, flags=re.DOTALL).strip()
+            # Send text part first
+            if clean_text:
+                await self._send_text(chat_id, clean_text, parse_mode, reply_to)
+            # Send SVG as a self-contained HTML file (opens in any browser)
+            import tempfile, os
+            html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Romih Agent — Drawing</title>
+<style>body{{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1a2e}}</style></head>
+<body>{svg_code}</body></html>"""
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
+                f.write(html)
+                tmp = f.name
+            try:
+                async with httpx.AsyncClient(timeout=30) as c:
+                    with open(tmp, 'rb') as f:
+                        form = {'chat_id': str(chat_id), 'caption': 'Romih Agent — Open to view drawing'}
+                        files = {'document': ('drawing.html', f, 'text/html')}
+                        r = await c.post(f"{self.base}/sendDocument", data=form, files=files)
+                        if r.json().get('ok'):
+                            return r.json()
+            finally:
+                os.unlink(tmp)
+            return await self._send_text(chat_id, clean_text, parse_mode, reply_to)
+
+        return await self._send_text(chat_id, text, parse_mode, reply_to)
+
+    async def _send_text(self, chat_id: int, text: str,
+                         parse_mode: str = None,
+                         reply_to: int = None) -> dict:
         payload = {
             "chat_id": chat_id,
             "text": text,
-            "parse_mode": parse_mode,
         }
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
         if reply_to:
             payload["reply_parameters"] = {"message_id": reply_to}
         try:
             async with httpx.AsyncClient(timeout=30) as c:
                 r = await c.post(f"{self.base}/sendMessage", json=payload)
+                if r.status_code != 200:
+                    print(f"Telegram send error: {r.status_code} - {r.text[:300]}")
                 return r.json()
         except Exception as e:
             print(f"Telegram send error: {e}")
@@ -104,6 +169,18 @@ class TelegramBot:
                 "reply_markup": keyboard,
                 "parse_mode": "Markdown"
             })
+            return r.json()
+
+    async def send_document(self, chat_id: int, content: str, filename: str,
+                            caption: str = "", mime: str = "text/csv") -> dict:
+        """Send a document file to a Telegram chat"""
+        import io
+        async with httpx.AsyncClient(timeout=30) as c:
+            files = {"document": (filename, io.BytesIO(content.encode('utf-8')), mime)}
+            data = {"chat_id": chat_id}
+            if caption:
+                data["caption"] = caption
+            r = await c.post(f"{self.base}/sendDocument", data=data, files=files)
             return r.json()
 
     async def answer_callback(self, callback_id: str, text: str = ""):
@@ -153,7 +230,7 @@ class TelegramBot:
 # ═══ معالج الرسائل ═══
 
 class MessageHandler:
-    """معالج رسائل Telegram — يوجهها لـ Romih Agent"""
+    """معالج رسائل Telegram - يوجهها لـ Romih Agent"""
 
     START_MSG = (
         "\U0001f338 *Romih Agent* \u2014 \u0648\u0643\u064a\u0644\u0643 \u0627\u0644\u0630\u0643\u064a\n\n"
@@ -183,6 +260,70 @@ class MessageHandler:
 
     def __init__(self, agent):
         self.agent = agent
+        self.onboard = None
+        try:
+            from plugins.onboarding import OnboardingInterview as OI
+            self.onboard = OI("onboarding_profile.json")
+        except Exception as e:
+            print(f"Onboarding not loaded: {e}")
+
+
+    def _deduplicate_response(self, text: str) -> str:
+        """Remove repeated sections from LLM response"""
+        NL = "\n"
+        paras = text.strip().split(NL + NL)
+        if len(paras) <= 3:
+            return text
+        seen = set()
+        unique = []
+        for p in paras:
+            clean = "".join(c for c in p.strip() if c.isalpha() or c == " ")
+            norm = clean[:80]
+            if not norm or norm not in seen or len(norm) < 10:
+                if norm:
+                    seen.add(norm)
+                unique.append(p)
+        return (NL + NL).join(unique)
+    async def _smart_reply(self, bot, chat_id, response):
+        """Send response - if it contains file content, send as document"""
+        # Clean raw JSON tool calls from response text
+        if isinstance(response, str):
+            import re
+            # Remove raw JSON tool call blocks
+            response = re.sub(r'\{\s*"tool"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:\s*\{[^}]*\}\s*\}', '', response)
+            response = re.sub(r'\n{3,}', '\n\n', response).strip()
+        # Deduplicate repeated sections
+        if isinstance(response, str):
+            response = self._deduplicate_response(response)
+        # File delivery: <<<FILE_CSV>>>
+        if isinstance(response, str) and response.startswith("<<<FILE_CSV>>>"):
+            try:
+                data = json.loads(response[14:])
+                csv = data.get("csv", "")
+                fname = data.get("filename", "romih_data.csv")
+                msg = data.get("message", "Here's your file")
+                # Send brief text message
+                await bot.send_message(chat_id, f"\u2705 {msg}"[:200])
+                # Send the CSV as a file
+                await bot.send_document(chat_id, csv, fname, "\uD83D\uDCC4 Generated by Romih Agent")
+                return
+            except Exception as e:
+                await bot.send_message(chat_id, f"Error creating file: {e}")
+                return
+        
+        # Check for code blocks with CSV
+        if isinstance(response, str) and "```csv" in response:
+            import re
+            match = re.search(r'```csv\s*\n(.*?)```', response, re.DOTALL)
+            if match:
+                csv_content = match.group(1).strip()
+                clean_text = re.sub(r'```csv\s*\n.*?```', '', response, flags=re.DOTALL).strip()
+                if clean_text:
+                    await bot.send_message(chat_id, clean_text[:2000])
+                await bot.send_document(chat_id, csv_content, "romih_data.csv", "\uD83D\uDCC4 Generated by Romih Agent")
+                return
+        
+        await bot.send_message(chat_id, response)
 
     async def handle(self, msg: dict, bot: TelegramBot) -> bool:
         """معالجة رسالة واردة"""
@@ -194,22 +335,102 @@ class MessageHandler:
         text = msg["text"]
         is_callback = msg.get("is_callback", False)
 
+        # Trial check - 10 days free then blocked
+        try:
+            from .trial_tracker import tracker
+            trial = tracker.check(chat_id, msg.get("first_name", username))
+            if not trial.get("allowed"):
+                await bot.send_message(chat_id, trial.get("message", "انتهت الفترة التجريبية"))
+                return True
+            if trial.get("days_left") and trial.get("days_left") <= 3 and not trial.get("is_admin"):
+                await bot.send_message(chat_id, f"⏰ متبقي {trial['days_left']} أيام في الفترة التجريبية المجانية")
+        except Exception:
+            pass  # fail open - allow if tracker is down
+
         # تحديث اسم المستخدم
-        self.agent.config.name = username
+        self.agent.config.name = msg.get("first_name", username)
+        # Also update onboarding profile with user's name
+        if self.onboard:
+            try:
+                self.onboard.profile.name = msg.get("first_name", username)
+            except:
+                pass
 
         # Callback query
         if is_callback:
             return await self._handle_callback(msg, bot)
 
+        # Load user memory for personalized responses
+        user_context = ""
+        try:
+            from .user_memory import memory
+            user_context = memory.recall_context(chat_id)
+            if user_context:
+                self.agent.add_context(user_context)
+        except Exception:
+            pass
+
         # أمر
         cmd, arg = TelegramBot.extract_command(text)
 
         if cmd == "/start":
-            await bot.send_message(chat_id, self.START_MSG)
+            # Personalized welcome with memory
+            try:
+                from .user_memory import memory
+                facts = memory.recall(chat_id)
+            except:
+                facts = {}
+            
+            name = msg.get("first_name", username)
+            if facts.get("industry"):
+                NL = "\n"
+                welcome = f"أهلاً {name}! 🌸" + NL*2 + f"آخر مرة كنت بتخطط لـ {facts.get('industry', 'عملك')}."
+                if facts.get("last_goal"):
+                    goal = facts['last_goal'][:100]
+                    welcome += NL + f"هدفك كان: {goal}." + NL*2 + "عاوز تكمل ولا حاجة جديدة؟"
+                else:
+                    welcome += NL*2 + "كيف أقدر أساعدك اليوم؟"
+            else:
+                NL = "\n"
+                welcome = f"أهلاً {name}! 🌸" + NL*2
+                welcome += "أنا Romih Agent — وكيلك الذكي. أساعدك في:" + NL
+                welcome += "🛠️ إدارة الورش" + NL
+                welcome += "📊 خطط تسويقية" + NL
+                welcome += "💰 تحليل مالي" + NL
+                welcome += "🔄 تحول رقمي" + NL
+                welcome += "🏨 إدارة فنادق" + NL
+                welcome += "🕋 خدمات العمرة" + NL*2
+                welcome += "كيف أقدر أخدمك؟"
+            
+            # Send with action buttons
+            keyboard = {
+                "inline_keyboard": [
+                    [{"text": "📊 خطة تسويقية", "callback_data": "ask:أريد خطة تسويقية لعملي"}],
+                    [{"text": "💰 تحليل تكاليف", "callback_data": "ask:حلل تكاليف عملي"},
+                     {"text": "🔄 تحول رقمي", "callback_data": "ask:أريد خطة تحول رقمي"}],
+                    [{"text": "📋 وصف مشكلتي", "callback_data": "ask_free"}]
+                ]
+            }
+            await bot.send_buttons(chat_id, welcome, keyboard)
             return True
 
         if cmd == "/help":
             await bot.send_message(chat_id, self.HELP_MSG)
+            return True
+
+        if cmd == "/onboarding":
+            self.onboard.reset()
+            if self.onboard:
+                welcome = self.onboard.get_welcome()
+            else:
+                welcome = self.START_MSG
+            await bot.send_message(chat_id, welcome)
+            return True
+
+        if cmd == "/goal" and arg:
+            await bot.send_chat_action(chat_id)
+            response = await self.agent.execute_goal(arg)
+            await self._smart_reply(bot, chat_id, response)
             return True
 
         if cmd == "/status":
@@ -292,17 +513,33 @@ class MessageHandler:
             await bot.send_message(chat_id, response)
             return True
 
+        if cmd == "/build":
+            await bot.send_message(chat_id, "Use: /build [project description]")
+            return True
+
         if cmd == "/ask" and arg:
             await bot.send_chat_action(chat_id)
             response = await self.agent.chat(arg)
-            await bot.send_message(chat_id, response)
+            await self._smart_reply(bot, chat_id, response)
+            # Save to memory
+            try:
+                from .user_memory import memory
+                memory.extract_and_remember(chat_id, arg, str(response)[:200])
+            except Exception:
+                pass
             return True
 
-        # رسالة عادية — دردشة
+        # رسالة عادية - دردشة
         if not cmd:
             await bot.send_chat_action(chat_id)
             response = await self.agent.chat(text)
-            await bot.send_message(chat_id, response)
+            await self._smart_reply(bot, chat_id, response)
+            # Save to memory
+            try:
+                from .user_memory import memory
+                memory.extract_and_remember(chat_id, text, str(response)[:200])
+            except Exception:
+                pass
             return True
 
         # أمر غير معروف
@@ -314,6 +551,17 @@ class MessageHandler:
         data = msg["text"]
         chat_id = msg["chat_id"]
         cb_id = msg.get("callback_id", "")
+
+        if data.startswith("ask:"):
+            query = data.split(":", 1)[1]
+            if query == "ask_free":
+                await bot.send_message(chat_id, "اكتب مشكلتك أو استفسارك بالتفصيل — وأنا معاك 🌸")
+            else:
+                await bot.answer_callback(cb_id)
+                await bot.send_chat_action(chat_id)
+                response = await self.agent.chat(query)
+                await self._smart_reply(bot, chat_id, response)
+            return True
 
         if data.startswith("expert:"):
             expert_key = data.split(":", 1)[1]
