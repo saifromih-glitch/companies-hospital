@@ -11,8 +11,8 @@ from dataclasses import dataclass, field
 
 from safety.shield import SafetyShield, SecretsVault
 from models.connectors import (
-    OllamaConnector, OpenRouterConnector, ZhipuConnector, AutoRouter,
-    ModelResponse, ollama, openrouter, zhipu, router
+    OllamaConnector, OpenRouterConnector, ZhipuConnector, GroqConnector, GeminiConnector, AutoRouter,
+    ModelResponse, ollama, openrouter, zhipu, groq, gemini, router
 )
 from memory.memory_system import MemorySystem
 from agents.swarm import AgentSwarm
@@ -56,6 +56,8 @@ class RomihAgent:
         self.ollama = ollama
         self.openrouter = openrouter
         self.zhipu = zhipu
+        self.groq = groq
+        self.gemini = gemini
         self.router = router
         self.is_orchestrator = create_swarm
         # Sub-agents: ذاكرة خفيفة بدون Swarm
@@ -336,25 +338,48 @@ class RomihAgent:
                 response = await self.zhipu.chat(
                     model_id, messages, self.config.temperature
                 )
+            elif provider == "groq":
+                response = await self.groq.chat(
+                    model_id, messages, self.config.temperature
+                )
+            elif provider == "gemini":
+                response = await self.gemini.chat(
+                    model_id, messages, self.config.temperature
+                )
             else:
                 response = await self.openrouter.chat(
                     model_id, messages, self.config.temperature
                 )
         except Exception as e:
-            # Fallback: جرب المحلي لو السحابي فشل
-            if provider == "openrouter":
+            # سلسلة احتياط: جرب كل النماذج المتاحة
+            last_error = f"{provider}: {e}"
+            fallbacks = [
+                ("zhipu", "glm-4-flash"),
+                ("groq", "llama-3.3-70b-versatile"),
+                ("gemini", "gemini-2.0-flash"),
+                ("openrouter", "nvidia/nemotron-3-super-120b-a12b:free"),
+            ]
+            for fb_provider, fb_model in fallbacks:
+                if fb_provider == provider:
+                    continue  # skip the one that just failed
                 try:
-                    local_models = await self.ollama.list_models()
-                    if local_models:
-                        response = await self.ollama.chat(
-                            local_models[0], messages, self.config.temperature
-                        )
-                    else:
-                        return f"❌ خطأ: {e}"
-                except Exception as e2:
-                    return f"❌ جميع النماذج غير متاحة: {e2}"
+                    if fb_provider == "zhipu" and os.environ.get("GLM_API_KEY"):
+                        response = await self.zhipu.chat(fb_model, messages, self.config.temperature)
+                        break
+                    elif fb_provider == "groq" and os.environ.get("GROQ_API_KEY"):
+                        response = await self.groq.chat(fb_model, messages, self.config.temperature)
+                        break
+                    elif fb_provider == "gemini" and os.environ.get("GEMINI_API_KEY"):
+                        response = await self.gemini.chat(fb_model, messages, self.config.temperature)
+                        break
+                    elif fb_provider == "openrouter":
+                        response = await self.openrouter.chat(fb_model, messages, self.config.temperature)
+                        break
+                except Exception as fb_err:
+                    last_error = f"{fb_provider}: {fb_err}"
+                    continue
             else:
-                return f"❌ النموذج المحلي غير متاح: {e}"
+                return f"❌ جميع النماذج غير متاحة: {last_error}"
 
         # ٦. حفظ الرد
         self.history.append(Message(role="assistant", content=response.content))

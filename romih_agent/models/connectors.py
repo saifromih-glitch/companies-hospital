@@ -174,6 +174,47 @@ class ZhipuConnector:
 
 
 
+class GeminiConnector:
+    """Google Gemini API - Gemini 2.0 Flash مجاني"""
+
+    def __init__(self, api_key: str = ""):
+        self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
+        self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
+
+    async def chat(self, model: str, messages: list[dict],
+                   temperature: float = 0.7) -> ModelResponse:
+        if not self.api_key:
+            raise ValueError("GEMINI_API_KEY غير موجود")
+
+        async with httpx.AsyncClient(timeout=60) as client:
+            # Convert OpenAI format to Gemini format
+            contents = []
+            for m in messages:
+                role = "user" if m["role"] == "user" else "model"
+                contents.append({"role": role, "parts": [{"text": m["content"]}]})
+
+            payload = {
+                "contents": contents,
+                "generationConfig": {"temperature": temperature, "maxOutputTokens": 4096}
+            }
+            model_name = model or "gemini-2.0-flash"
+            resp = await client.post(
+                f"{self.base_url}/{model_name}:generateContent",
+                json=payload,
+                headers={"x-goog-api-key": self.api_key},
+                params={"key": self.api_key}
+            )
+            data = resp.json()
+            if "candidates" not in data:
+                raise RuntimeError(f"Gemini error: {data}")
+            text = data["candidates"][0]["content"]["parts"][0].get("text", "")
+            return ModelResponse(
+                content=text, model=model_name,
+                tokens=data.get("usageMetadata", {}).get("totalTokenCount", 0),
+                provider="gemini"
+            )
+
+
 class GroqConnector:
     """Groq API - Llama 3.3 70B مجاني وسريع"""
 
@@ -288,15 +329,24 @@ class AutoRouter:
 
     def route_cloud(self, task_type: str, need_speed: bool = False) -> tuple[str, str]:
         """اختيار نموذج سحابي — GLM-4 للمعقد، flash للسريع، Groq/OpenRouter احتياط"""
-        # Zhipu GLM-4-flash is free, fast, excellent Arabic
+        # 1. Zhipu GLM — الأساسي (مجاني، عربي ممتاز)
         if os.environ.get("GLM_API_KEY"):
             if need_speed:
                 return "glm-4-flash", "zhipu"
-            return "glm-4", "zhipu"  # GLM-4 for complex tasks
-        # Fallback to OpenRouter free models
+            return "glm-4", "zhipu"
+
+        # 2. Groq — Llama 3.3 70B (مجاني، سريع)
+        if os.environ.get("GROQ_API_KEY"):
+            return "llama-3.3-70b-versatile", "groq"
+
+        # 3. Gemini — Google (مجاني، 1500/يوم)
+        if os.environ.get("GEMINI_API_KEY"):
+            return "gemini-2.0-flash", "gemini"
+
+        # 4. OpenRouter — آخر احتياط
         if need_speed:
             return self.FAST_MODELS["cloud"][0], "openrouter"
-        if task_type == "code":
+        elif task_type == "code":
             return self.CODE_MODELS["cloud"][0], "openrouter"
         elif task_type == "arabic":
             return self.ARABIC_MODELS["cloud"][0], "openrouter"
@@ -310,4 +360,6 @@ class AutoRouter:
 ollama = OllamaConnector()
 openrouter = OpenRouterConnector()
 zhipu = ZhipuConnector()
+groq = GroqConnector()
+gemini = GeminiConnector()
 router = AutoRouter(ollama)
