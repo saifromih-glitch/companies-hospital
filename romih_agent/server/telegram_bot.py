@@ -335,6 +335,18 @@ class MessageHandler:
         text = msg["text"]
         is_callback = msg.get("is_callback", False)
 
+        # Trial check - 10 days free then blocked
+        try:
+            from .trial_tracker import tracker
+            trial = tracker.check(chat_id, msg.get("first_name", username))
+            if not trial.get("allowed"):
+                await bot.send_message(chat_id, trial.get("message", "انتهت الفترة التجريبية"))
+                return True
+            if trial.get("days_left") and trial.get("days_left") <= 3 and not trial.get("is_admin"):
+                await bot.send_message(chat_id, f"⏰ متبقي {trial['days_left']} أيام في الفترة التجريبية المجانية")
+        except Exception:
+            pass  # fail open - allow if tracker is down
+
         # تحديث اسم المستخدم
         self.agent.config.name = msg.get("first_name", username)
         # Also update onboarding profile with user's name
