@@ -270,19 +270,20 @@ class MessageHandler:
 
     def _deduplicate_response(self, text: str) -> str:
         """Remove repeated sections from LLM response"""
-        import re
-        paras = text.strip().split("\n\n")
+        NL = "\n"
+        paras = text.strip().split(NL + NL)
         if len(paras) <= 3:
             return text
         seen = set()
         unique = []
         for p in paras:
-            norm = re.sub(r"[^A-Za-z\u0621-\u064a]", "", p.strip())[:80]
+            clean = "".join(c for c in p.strip() if c.isalpha() or c == " ")
+            norm = clean[:80]
             if not norm or norm not in seen or len(norm) < 10:
                 if norm:
                     seen.add(norm)
                 unique.append(p)
-        return "\n\n".join(unique)
+        return (NL + NL).join(unique)
     async def _smart_reply(self, bot, chat_id, response):
         """Send response - if it contains file content, send as document"""
         # Clean raw JSON tool calls from response text
