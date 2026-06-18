@@ -72,8 +72,31 @@ footer span{color:#a78bfa}
 
 @media(max-width:768px){
   .hero h1{font-size:2em}
+  .hero .sub{font-size:1em}
   .hero .stats{gap:20px}
   .hero .stat .num{font-size:1.5em}
+  .hero{padding:40px 16px 30px}
+  .btn{display:block;width:100%;max-width:320px;margin:8px auto;font-size:1em;padding:14px 20px}
+  .btn-outline{margin-right:auto}
+  .section{padding:40px 16px}
+  .section h2{font-size:1.5em;margin-bottom:24px}
+  .features{grid-template-columns:1fr;gap:12px}
+  .card{padding:20px}
+  .plugins{grid-template-columns:repeat(2,1fr);gap:10px}
+  .plugin-card{padding:14px}
+  .pricing{grid-template-columns:1fr;gap:16px;max-width:400px;margin:0 auto}
+  .price-card{padding:24px}
+  .cta{padding:40px 16px}
+  .cta h2{font-size:1.8em}
+  footer{padding:24px 16px;font-size:0.9em}
+}
+@media(max-width:400px){
+  .hero h1{font-size:1.5em}
+  .hero .stats{gap:10px}
+  .hero .stat .num{font-size:1.2em}
+  .hero .stat .label{font-size:0.75em}
+  .plugins{grid-template-columns:1fr}
+  .container{padding:0 8px}
 }
 </style>
 </head>
