@@ -581,7 +581,20 @@ class MessageHandler:
         # رسالة عادية - دردشة
         if not cmd:
             await bot.send_chat_action(chat_id)
-            response = await self.agent.chat(text)
+            response = None
+            
+            # Route accounting questions to OpenRouter Nemotron (free)
+            try:
+                from .hybrid_router import router as hr
+                if hr.is_accounting_question(text):
+                    response = await hr.ask_accountant(self.agent.system_prompt, text)
+            except Exception:
+                pass
+            
+            # Fallback to GLM-4 if routing failed
+            if not response:
+                response = await self.agent.chat(text)
+            
             await self._smart_reply(bot, chat_id, response)
             # Save to memory
             try:
