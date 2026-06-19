@@ -237,17 +237,17 @@ class RomihAgent:
 2. ضع طلب الأداة في كتلة JSON:
 
 ```json
-{"tool": "create_xlsx", "args": {"title": "العنوان", "sheet_name": "الورقة", "headers": ["اسم1", "اسم2"], "data": [["ق1", "ق2"], ["ق3", "ق4"]], "filename": "اسم_الملف.xlsx"}}
+{{"tool": "create_xlsx", "args": {{"title": "العنوان", "sheet_name": "الورقة", "headers": ["اسم1", "اسم2"], "data": [["ق1", "ق2"], ["ق3", "ق4"]], "filename": "اسم_الملف.xlsx"}}
 ```
 
 للـ CSV:
 ```json
-{"tool": "create_csv", "args": {"headers": [...], "data": [[...]], "filename": "ملف.csv"}}
+{{"tool": "create_csv", "args": {{"headers": [...], "data": [[...]], "filename": "ملف.csv"}}
 ```
 
 للـ Chart (رسم بياني):
 ```json
-{"tool": "generate_chart", "args": {"type": "bar", "labels": ["س", "ص"], "values": [10, 20], "title": "عنوان"}}
+{{"tool": "generate_chart", "args": {{"type": "bar", "labels": ["س", "ص"], "values": [10, 20], "title": "عنوان"}}
 ```
 
 تنبيهات:
@@ -278,11 +278,11 @@ class RomihAgent:
 • مثال: "كم حجم شركتك؟ ماذا جربت من قبل؟ ما توقعاتك للشهور الستة القادمة؟"
 
 
-{ehab_knowledge}
+{{ehab_knowledge}}
 
-{tools_prompt}
+{{tools_prompt}}
 
-اسم المستخدم: {self.config.name}"""
+اسم المستخدم: {{self.config.name}}"""
 
     def _load_ehab_knowledge(self) -> str:
         """تحميل معرفة الدكتور إيهاب مسلم في البرومبت"""
