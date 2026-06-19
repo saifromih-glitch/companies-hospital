@@ -112,6 +112,50 @@ class HybridRouter:
         except Exception as e:
             print(f"HybridRouter: {e}")
             return None
+    
+    EXECUTOR_MODEL = "openai/gpt-4o-mini"
+    
+    async def execute(self, system_prompt: str, user_message: str, tools: list = None) -> str:
+        """Execute task with GPT-4o-mini (paid - real tool calling)"""
+        api_key = os.environ.get("OPENROUTER_API_KEY", "")
+        if not api_key:
+            return None
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ]
+        
+        payload = {
+            "model": self.EXECUTOR_MODEL,
+            "messages": messages,
+            "max_tokens": 3000,
+            "temperature": 0.3,
+        }
+        
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+        
+        try:
+            async with httpx.AsyncClient(timeout=90) as client:
+                r = await client.post(
+                    self.OPENROUTER_URL,
+                    json=payload,
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json",
+                    }
+                )
+                if r.status_code == 200:
+                    data = r.json()
+                    return data["choices"][0]["message"]["content"]
+                else:
+                    print(f"HybridRouter execute: HTTP {r.status_code}")
+                    return None
+        except Exception as e:
+            print(f"HybridRouter execute: {e}")
+            return None
 
 
 # Global instance
