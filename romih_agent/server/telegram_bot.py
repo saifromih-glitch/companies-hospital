@@ -391,10 +391,22 @@ class MessageHandler:
         try:
             from .user_memory import memory
             user_context = memory.recall_context(chat_id)
-            if user_context:
-                self.agent.add_context(user_context)
         except Exception:
             pass
+        
+        # Dynamic knowledge injection - load domain expertise on demand
+        domain_knowledge = ""
+        try:
+            from .knowledge_router import knowledge as kr
+            kr.load_accounting()  # preload accounting
+            domain_knowledge = kr.get_prompt(text)
+            if domain_knowledge:
+                user_context += domain_knowledge
+        except Exception:
+            pass
+        
+        if user_context:
+            self.agent.add_context(user_context)
 
         # أمر
         cmd, arg = TelegramBot.extract_command(text)
