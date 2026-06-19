@@ -555,26 +555,27 @@ class MessageHandler:
                 pass
             return True
 
-        # File generation commands - use Tool Guard directly
+        # File generation commands - Hybrid: OpenRouter (free) for files, GLM-4 fallback
         if cmd in ("/pdf", "/xlsx", "/docx", "/pptx", "/csv"):
             NL = "\n"
-            tool_map = {
-                "/pdf": "create_pdf",
-                "/xlsx": "create_xlsx",
-                "/docx": "create_docx",
-                "/pptx": "create_pptx",
-                "/csv": "create_csv",
-            }
-            tool = tool_map[cmd]
             prompt = arg or text
-            # Tell the model to generate this file type specifically
-            file_prompt = f"Create a {cmd[1:].upper()} file about: {prompt}. Use the JSON tool format for {tool}."
             await bot.send_chat_action(chat_id)
+            response = None
+            # Try OpenRouter free model first (better at structured JSON)
             try:
-                response = await self.agent.chat(file_prompt)
-                await self._smart_reply(bot, chat_id, response)
+                from .hybrid_router import router as hr
+                if hr.is_file_request(prompt):
+                    response = await hr.generate_file(self.agent.system_prompt, prompt)
             except Exception:
-                await bot.send_message(chat_id, f"{NL}عذراً — تعذر إنشاء الملف. حاول مرة أخرى.")
+                pass
+            # Fallback to GLM-4 if OpenRouter failed
+            if not response:
+                file_prompt = f"Create a file: {prompt}. Respond with ONLY a JSON tool call. No tables, no explanations."
+                try:
+                    response = await self.agent.chat(file_prompt)
+                except Exception:
+                    response = f"{NL}عذراً — تعذر إنشاء الملف. حاول مرة أخرى."
+            await self._smart_reply(bot, chat_id, response)
             return True
 
         # رسالة عادية - دردشة
