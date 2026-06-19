@@ -13,6 +13,8 @@ class ToolGuard:
             "create_xlsx": self._create_xlsx,
             "create_csv": self._create_csv,
             "create_docx": self._create_docx,
+            "create_pptx": self._create_pptx,
+            "create_pdf": self._create_pdf,
             "generate_chart": self._generate_chart,
         }
     
@@ -156,6 +158,87 @@ class ToolGuard:
             "name": args.get("filename", "romih_doc.docx"),
             "content": output.getvalue(),
             "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        }
+    
+    def _create_pptx(self, args: dict) -> dict:
+        """Create PPTX presentation"""
+        from pptx import Presentation
+        from pptx.util import Inches, Pt
+        
+        prs = Presentation()
+        prs.slide_width = Inches(10)
+        prs.slide_height = Inches(7.5)
+        
+        title = args.get("title", "Presentation")
+        slides = args.get("slides", [])
+        
+        # Title slide
+        slide = prs.slides.add_slide(prs.slide_layouts[0])
+        slide.shapes.title.text = title
+        if slides:
+            slide.placeholders[1].text = slides[0].get("subtitle", "")
+        
+        # Content slides
+        for s in slides[1:]:
+            slide = prs.slides.add_slide(prs.slide_layouts[1])
+            slide.shapes.title.text = s.get("title", "")
+            body = slide.placeholders[1]
+            body.text = s.get("content", "")
+            if s.get("items"):
+                for item in s["items"]:
+                    body.text += "\n" + "• " + item
+        
+        output = io.BytesIO()
+        prs.save(output)
+        output.seek(0)
+        
+        return {
+            "name": args.get("filename", "romih_presentation.pptx"),
+            "content": output.getvalue(),
+            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        }
+    
+    def _create_pdf(self, args: dict) -> dict:
+        """Create PDF using fpdf"""
+        from fpdf import FPDF
+        
+        pdf = FPDF()
+        pdf.add_page()
+        
+        # Arabic font support
+        try:
+            pdf.add_font('Arabic', '', r'C:\Windows\Fonts\arial.ttf', uni=True)
+            pdf.set_font('Arabic', '', 12)
+        except:
+            pdf.set_font('Arial', '', 12)
+        
+        if args.get("title"):
+            pdf.set_font_size(18)
+            pdf.cell(0, 10, args["title"], ln=True, align='C')
+            pdf.ln(10)
+        
+        pdf.set_font_size(12)
+        for section in args.get("sections", []):
+            if section.get("heading"):
+                pdf.set_font_size(14)
+                pdf.cell(0, 8, section["heading"], ln=True)
+                pdf.set_font_size(12)
+            if section.get("text"):
+                pdf.multi_cell(0, 6, section["text"])
+            if section.get("items"):
+                for item in section["items"]:
+                    pdf.cell(10)
+                    pdf.cell(0, 6, "• " + item, ln=True)
+            pdf.ln(4)
+        
+        output = io.BytesIO()
+        pdf.output(output)
+        output.seek(0)
+        
+        return {
+            "name": args.get("filename", "romih_document.pdf"),
+            "content": output.getvalue(),
+            "mime": "application/pdf"
         }
     
     def _generate_chart(self, args: dict) -> dict:
