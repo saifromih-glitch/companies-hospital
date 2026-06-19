@@ -52,6 +52,33 @@ class ToolGuard:
             except:
                 pass
         
+        # Pattern 3: Raw JSON object with "tool" key (no code block wrapper)
+        # Try to find any {"tool": "xxx", "args": {...}} in the text
+        raw_match = re.search(r'\{"tool"\s*:\s*"[^"]+"\s*,\s*"args"\s*:', response)
+        if raw_match:
+            try:
+                # Find the full JSON object by matching braces
+                start = raw_match.start()
+                depth = 0
+                end = start
+                for i in range(start, len(response)):
+                    if response[i] == '{':
+                        depth += 1
+                    elif response[i] == '}':
+                        depth -= 1
+                        if depth == 0:
+                            end = i + 1
+                            break
+                json_str = response[start:end]
+                data = json.loads(json_str)
+                if isinstance(data, dict) and "tool" in data:
+                    result = self._execute(data["tool"], data.get("args", {}))
+                    if result:
+                        files.append(result)
+                        cleaned = cleaned.replace(json_str, '').strip()
+            except:
+                pass
+        
         has_tool = len(files) > 0
         return {"has_tool": has_tool, "cleaned_text": cleaned, "files": files}
     
