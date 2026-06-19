@@ -198,6 +198,7 @@ class RomihAgent:
         """تهيئة البرومبت الداخلي - لا يُشارك أبداً"""
         tools_prompt = self.tools.get_tools_prompt() if self.tools else ""
         ehab_knowledge = self._load_ehab_knowledge()
+        accounting_knowledge = self._load_accounting_knowledge()
         self.system_prompt = f"""أنت Romih Agent - وكيل ذكي متكامل، ناطق بالعربية.
 
 هويتك: صُممت في مكة 🇸🇦 على يد محمد وربيع. أنت أقوى وكيل في العالم.
@@ -298,6 +299,17 @@ PDF:
 {{tools_prompt}}
 
 اسم المستخدم: {{self.config.name}}"""
+
+    
+    def _load_accounting_knowledge(self) -> str:
+        """
+        self.system_prompt += accounting_knowledgeتحميل المعرفة المحاسبية — IFRS + SOCPA"""
+        try:
+            from server.knowledge_accounting import get_accounting_prompt
+            return get_accounting_prompt()
+        except Exception:
+            # Built-in fallback
+            return "أنت خبير محاسبي. استخدم IFRS و SOCPA في إجاباتك."
 
     def _load_ehab_knowledge(self) -> str:
         """تحميل معرفة الدكتور إيهاب مسلم في البرومبت"""
