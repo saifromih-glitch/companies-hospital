@@ -1,3 +1,4 @@
+NL = "\n"
 """
 Dynamic Knowledge Router — injects domain knowledge on demand
 Thin, fast, no overload — like how Rabie thinks
@@ -58,17 +59,37 @@ class KnowledgeRouter:
                 matched.append(domain)
         return matched[:2]  # Max 2 domains to avoid overload
     
+    DEEP_KEYWORDS = [
+        NL.join(["حلل", "فكك", "ادرس", "حل", "خطة", "استراتيجية", "استراتيجيه",
+        "سبب", "جذر", "ليش", "ليه", "لماذا", "مشكلة", "مشكله",
+        "طور", "حسن", "عاوز خطة", "أريد خطة", "ابني", "صمم"])
+    ]
+    
+    def is_deep_question(self, message: str) -> bool:
+        text = message.lower()
+        if len(message) > 150:
+            return True
+        if message.count("؟") >= 2:
+            return True
+        if message.count("؟") >= 1 and message.count("و") >= 4:
+            return True
+        return any(kw in text for kw in self.DEEP_KEYWORDS)
+    
     def get_prompt(self, message: str) -> str:
         """Get relevant knowledge prompt for this message"""
-        domains = self.detect(message)
-        if not domains:
-            return ""
-        
         parts = []
+        
+        # Domain knowledge
+        domains = self.detect(message)
         for domain in domains:
             prompt = self.DOMAINS[domain]["prompt"]
             if prompt:
                 parts.append(prompt)
+        
+        # Methodology layer for deep questions
+        if self.is_deep_question(message):
+            from .rabie_layer import get_methodology_prompt
+            parts.append(get_methodology_prompt())
         
         if not parts:
             return ""
