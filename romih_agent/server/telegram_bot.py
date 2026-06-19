@@ -56,6 +56,11 @@ class TelegramBot:
             {"command": "tools", "description": "الأدوات المتاحة"},
             {"command": "agents", "description": "الوكلاء الفرعيون"},
             {"command": "memory", "description": "الذاكرة"},
+            {"command": "pdf", "description": "إنشاء ملف PDF"},
+            {"command": "xlsx", "description": "إنشاء ملف إكسيل"},
+            {"command": "pptx", "description": "إنشاء عرض تقديمي"},
+            {"command": "docx", "description": "إنشاء ملف وورد"},
+            {"command": "csv", "description": "إنشاء ملف CSV"},
             {"command": "help", "description": "المساعدة"},
         ]
         async with httpx.AsyncClient(timeout=15) as c:
@@ -255,7 +260,12 @@ class MessageHandler:
         "\u2022 /status \u2014 \u062d\u0627\u0644\u0629 \u0627\u0644\u0646\u0638\u0627\u0645\n"
         "\u2022 /tools \u2014 \u0627\u0644\u0623\u062f\u0648\u0627\u062a \u0627\u0644\u0645\u062a\u0627\u062d\u0629\n"
         "\u2022 /agents \u2014 \u0627\u0644\u0648\u0643\u0644\u0627\u0621 \u0627\u0644\u0641\u0631\u0639\u064a\u0648\u0646\n"
-        "\u2022 /memory \u2014 \u062d\u0627\u0644\u0629 \u0627\u0644\u0630\u0627\u0643\u0631\u0629"
+        "\u2022 /memory \u2014 \u062d\u0627\u0644\u0629 \u0627\u0644\u0630\u0627\u0643\u0631\u0629\n"
+        "\u2022 /pdf _\u0645\u0648\u0636\u0648\u0639_ \u2014 \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 PDF\n"
+        "\u2022 /xlsx _\u0645\u0648\u0636\u0648\u0639_ \u2014 \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 \u0625\u0643\u0633\u064a\u0644\n"
+        "\u2022 /pptx _\u0645\u0648\u0636\u0648\u0639_ \u2014 \u0625\u0646\u0634\u0627\u0621 \u0639\u0631\u0636 \u062a\u0642\u062f\u064a\u0645\u064a\n"
+        "\u2022 /docx _\u0645\u0648\u0636\u0648\u0639_ \u2014 \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 \u0648\u0648\u0631\u062f\n"
+        "\u2022 /csv _\u0645\u0648\u0636\u0648\u0639_ \u2014 \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 CSV"
     )
 
     def __init__(self, agent):
@@ -543,6 +553,28 @@ class MessageHandler:
                 memory.extract_and_remember(chat_id, arg, str(response)[:200])
             except Exception:
                 pass
+            return True
+
+        # File generation commands - use Tool Guard directly
+        if cmd in ("/pdf", "/xlsx", "/docx", "/pptx", "/csv"):
+            NL = "\n"
+            tool_map = {
+                "/pdf": "create_pdf",
+                "/xlsx": "create_xlsx",
+                "/docx": "create_docx",
+                "/pptx": "create_pptx",
+                "/csv": "create_csv",
+            }
+            tool = tool_map[cmd]
+            prompt = arg or text
+            # Tell the model to generate this file type specifically
+            file_prompt = f"Create a {cmd[1:].upper()} file about: {prompt}. Use the JSON tool format for {tool}."
+            await bot.send_chat_action(chat_id)
+            try:
+                response = await self.agent.chat(file_prompt)
+                await self._smart_reply(bot, chat_id, response)
+            except Exception:
+                await bot.send_message(chat_id, f"{NL}عذراً — تعذر إنشاء الملف. حاول مرة أخرى.")
             return True
 
         # رسالة عادية - دردشة
