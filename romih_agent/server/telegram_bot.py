@@ -567,26 +567,38 @@ class MessageHandler:
                 pass
             return True
 
-        # File generation commands - Hybrid: OpenRouter (free) for files, GLM-4 fallback
+        # File generation commands - GPT-4o-mini executor
         if cmd in ("/pdf", "/xlsx", "/docx", "/pptx", "/csv"):
             NL = "\n"
             prompt = arg or text
             await bot.send_chat_action(chat_id)
             response = None
-            # Try OpenRouter free model first (better at structured JSON)
+            
+            # Try GPT-4o-mini first (best tool calling)
             try:
                 from .hybrid_router import router as hr
-                if hr.is_file_request(prompt):
-                    response = await hr.generate_file(self.agent.system_prompt, prompt)
+                file_type = cmd[1:]  # pdf, xlsx, docx...
+                tool_prompt = f"Create a {file_type.upper()} file. Respond with JSON tool call: "
+                tool_prompt += '{"tool":"create_TYPE","args":{...}}. No markdown tables. Just JSON.'
+                response = await hr.execute(self.agent.system_prompt + "\n" + tool_prompt, prompt)
             except Exception:
                 pass
-            # Fallback to GLM-4 if OpenRouter failed
+            
+            # Fallback to Nemotron free model
             if not response:
-                file_prompt = f"Create a file: {prompt}. Respond with ONLY a JSON tool call. No tables, no explanations."
                 try:
-                    response = await self.agent.chat(file_prompt)
+                    from .hybrid_router import router as hr
+                    response = await hr.generate_file(self.agent.system_prompt, prompt)
+                except Exception:
+                    pass
+            
+            # Final fallback to GLM-4
+            if not response:
+                try:
+                    response = await self.agent.chat(f"Create a file: {prompt}. JSON tool call only.")
                 except Exception:
                     response = f"{NL}عذراً — تعذر إنشاء الملف. حاول مرة أخرى."
+            
             await self._smart_reply(bot, chat_id, response)
             return True
 
@@ -595,11 +607,15 @@ class MessageHandler:
             await bot.send_chat_action(chat_id)
             response = None
             
-            # Route accounting questions to OpenRouter Nemotron (free)
+            # Route accounting questions to GPT-4o-mini (best accuracy)
             try:
                 from .hybrid_router import router as hr
                 if hr.is_accounting_question(text):
-                    response = await hr.ask_accountant(self.agent.system_prompt, text)
+                    # Try GPT-4o-mini first
+                    response = await hr.execute(self.agent.system_prompt, text)
+                    # Fallback to Nemotron free
+                    if not response:
+                        response = await hr.ask_accountant(self.agent.system_prompt, text)
             except Exception:
                 pass
             
