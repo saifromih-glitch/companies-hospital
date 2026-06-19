@@ -295,6 +295,22 @@ class MessageHandler:
         # Deduplicate repeated sections
         if isinstance(response, str):
             response = self._deduplicate_response(response)
+        
+        # Tool Guard - scan for tool calls and execute them
+        if isinstance(response, str):
+            try:
+                from .tool_guard import guard
+                result = guard.scan(str(response))
+                if result["has_tool"]:
+                    # Send cleaned text (without JSON tool blocks)
+                    if result["cleaned_text"]:
+                        await self._send_text(chat_id, result["cleaned_text"][:2000], parse_mode=None)
+                    # Send generated files
+                    for f in result["files"]:
+                        await bot.send_document(chat_id, f["content"], f["name"], "Romih File")
+                    return
+            except Exception:
+                pass  # tool guard failed - fall through to normal send
         # File delivery: <<<FILE_CSV>>>
         if isinstance(response, str) and response.startswith("<<<FILE_CSV>>>"):
             try:
